@@ -1,9 +1,12 @@
-// View switching functionality
+// View switching functionality with smooth transitions
 const viewButtons = document.querySelectorAll('.view-btn');
 const views = document.querySelectorAll('.view');
 
 viewButtons.forEach(button => {
     button.addEventListener('click', () => {
+        // Skip if already active
+        if (button.classList.contains('active')) return;
+
         // Remove active class from all buttons and views
         viewButtons.forEach(btn => btn.classList.remove('active'));
         views.forEach(view => view.classList.remove('active'));
@@ -11,7 +14,11 @@ viewButtons.forEach(button => {
         // Add active class to clicked button and corresponding view
         button.classList.add('active');
         const viewId = button.getAttribute('data-view');
-        document.getElementById(`view-${viewId}`).classList.add('active');
+        const targetView = document.getElementById(`view-${viewId}`);
+        targetView.classList.add('active');
+
+        // Smooth scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 });
 
