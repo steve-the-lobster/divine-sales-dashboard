@@ -1,63 +1,98 @@
-// View switching functionality with smooth transitions
+// ============================================
+// GLOBAL STATE
+// ============================================
+
+const COUNTRIES = {
+    BR: { name: 'Brasil', flag: '🇧🇷', currency: 'R$' },
+    US: { name: 'EUA', flag: '🇺🇸', currency: '$' },
+    CA: { name: 'Canadá', flag: '🇨🇦', currency: 'CAD$' },
+    GB: { name: 'Reino Unido', flag: '🇬🇧', currency: '£' },
+    AU: { name: 'Austrália', flag: '🇦🇺', currency: 'AUD$' },
+    GLOBAL: { name: 'Global', flag: '🌎', currency: 'USD$' }
+};
+
+let currentCountry = {
+    divinetalk: 'BR',
+    divinetv: 'BR'
+};
+
+// ============================================
+// VIEW SWITCHING
+// ============================================
+
 const viewButtons = document.querySelectorAll('.view-btn');
 const views = document.querySelectorAll('.view');
 
 viewButtons.forEach(button => {
     button.addEventListener('click', () => {
-        // Skip if already active
         if (button.classList.contains('active')) return;
 
-        // Remove active class from all buttons and views
         viewButtons.forEach(btn => btn.classList.remove('active'));
         views.forEach(view => view.classList.remove('active'));
 
-        // Add active class to clicked button and corresponding view
         button.classList.add('active');
         const viewId = button.getAttribute('data-view');
         const targetView = document.getElementById(`view-${viewId}`);
         targetView.classList.add('active');
 
-        // Smooth scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Update overview metrics when switching to it
+        if (viewId === 'overview') {
+            updateOverviewMetrics();
+        }
     });
 });
 
-// Placeholder for future API integration
-async function fetchSalesData() {
-    // This will be implemented in Phase 2 with App Store Connect API
-    console.log('Ready for API integration');
-    
-    // Future implementation:
-    // - Fetch data from App Store Connect API
-    // - Parse trials, conversions, revenue
-    // - Update DOM with real data
-    // - Add charts and graphs
-    // - Implement real-time updates
-}
+// ============================================
+// COUNTRY TABS
+// ============================================
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('✨ Divine Sales Dashboard loaded successfully!');
-    console.log('📊 Ready for Phase 2: API integration');
-    
-    // Future: Call fetchSalesData() here
+const countryTabs = document.querySelectorAll('.country-tab');
+
+countryTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        const app = tab.dataset.app;
+        const country = tab.dataset.country;
+        
+        // Update active tab
+        document.querySelectorAll(`.country-tab[data-app="${app}"]`).forEach(t => {
+            t.classList.remove('active');
+        });
+        tab.classList.add('active');
+        
+        // Update current country
+        currentCountry[app] = country;
+        
+        // Update country label
+        const countryInfo = COUNTRIES[country];
+        const label = document.getElementById(`${app}-country-label`);
+        if (label) {
+            label.textContent = `${countryInfo.name} ${countryInfo.flag}`;
+        }
+        
+        // Reload data for this country
+        if (app === 'divinetalk') {
+            tableDivineTalk.switchCountry(country);
+        } else if (app === 'divinetv') {
+            tableDivineTV.switchCountry(country);
+        }
+    });
 });
 
-// Add smooth scroll behavior
-document.documentElement.style.scrollBehavior = 'smooth';
-
 // ============================================
-// DAILY DATA TABLE - Editable Excel-like Table
+// DAILY DATA TABLE CLASS
 // ============================================
 
 class DailyDataTable {
     constructor(appName) {
         this.appName = appName;
+        this.appId = appName === 'DivineTalk' ? 'divinetalk' : 'divinetv';
         const suffix = appName === 'DivineTalk' ? 'DivineTalk' : 'DivineTV';
         this.tableBody = document.getElementById(`tableBody${suffix}`);
         this.addRowBtn = document.getElementById(`addRowBtn${suffix}`);
         this.exportCsvBtn = document.getElementById(`exportCsvBtn${suffix}`);
-        this.storageKey = `${appName.toLowerCase()}_data`;
+        this.currentCountry = 'BR';
         
         this.columns = [
             { key: 'date', label: 'Data', type: 'date' },
@@ -81,10 +116,20 @@ class DailyDataTable {
         this.init();
     }
     
+    getStorageKey() {
+        return `${this.appId}_${this.currentCountry}`;
+    }
+    
     init() {
         this.loadData();
         this.addRowBtn.addEventListener('click', () => this.addRow());
         this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
+    }
+    
+    switchCountry(country) {
+        this.currentCountry = country;
+        this.loadData();
+        this.updateMetrics();
     }
     
     loadData() {
@@ -96,13 +141,16 @@ class DailyDataTable {
         } else {
             data.forEach((row, index) => this.renderRow(row, index));
         }
+        
+        this.updateMetrics();
     }
     
     showEmptyState() {
+        const countryInfo = COUNTRIES[this.currentCountry];
         this.tableBody.innerHTML = `
             <tr>
                 <td colspan="17" class="empty-state">
-                    <p>📊 Nenhum dado cadastrado ainda</p>
+                    <p>📊 Nenhum dado cadastrado para ${countryInfo.name} ${countryInfo.flag}</p>
                     <p style="font-size: 0.9rem; color: var(--text-secondary);">
                         Clique em "+ Adicionar Linha" para começar
                     </p>
@@ -115,7 +163,6 @@ class DailyDataTable {
         const tr = document.createElement('tr');
         tr.dataset.index = index;
         
-        // Render data cells
         this.columns.forEach(col => {
             const td = document.createElement('td');
             const input = this.createInput(col, rowData[col.key], index);
@@ -123,7 +170,6 @@ class DailyDataTable {
             tr.appendChild(td);
         });
         
-        // Render delete button
         const actionTd = document.createElement('td');
         actionTd.className = 'actions-col';
         const deleteBtn = document.createElement('button');
@@ -150,7 +196,10 @@ class DailyDataTable {
             input.addEventListener('focus', (e) => this.unformatValue(e.target, col));
         }
         
-        input.addEventListener('input', () => this.saveData());
+        input.addEventListener('input', () => {
+            this.saveData();
+            this.updateMetrics();
+        });
         
         return input;
     }
@@ -181,7 +230,6 @@ class DailyDataTable {
         const newRow = {};
         this.columns.forEach(col => newRow[col.key] = '');
         
-        // Set today's date by default
         const today = new Date().toISOString().split('T')[0];
         newRow.date = today;
         
@@ -189,7 +237,6 @@ class DailyDataTable {
         this.setData(data);
         this.loadData();
         
-        // Scroll to the new row
         setTimeout(() => {
             this.tableBody.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
             this.tableBody.lastElementChild.querySelector('input').focus();
@@ -218,8 +265,6 @@ class DailyDataTable {
             inputs.forEach(input => {
                 const col = input.dataset.column;
                 let value = input.value;
-                
-                // Clean value for storage
                 value = value.replace(/[^\d.-]/g, '');
                 rowData[col] = value;
             });
@@ -231,12 +276,45 @@ class DailyDataTable {
     }
     
     getData() {
-        const stored = localStorage.getItem(this.storageKey);
+        const stored = localStorage.getItem(this.getStorageKey());
         return stored ? JSON.parse(stored) : [];
     }
     
     setData(data) {
-        localStorage.setItem(this.storageKey, JSON.stringify(data));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(data));
+    }
+    
+    updateMetrics() {
+        const data = this.getData();
+        
+        let totalTrials = 0;
+        let totalSubscribers = 0;
+        let totalRevenue = 0;
+        
+        data.forEach(row => {
+            totalTrials += parseFloat(row.trials) || 0;
+            totalSubscribers += parseFloat(row.subscribers) || 0;
+            
+            const revenueApple = parseFloat(row.revenueApple) || 0;
+            const revenueAndroid = parseFloat(row.revenueAndroid) || 0;
+            totalRevenue += revenueApple + revenueAndroid;
+        });
+        
+        const conversionRate = totalTrials > 0 ? (totalSubscribers / totalTrials * 100) : 0;
+        
+        // Update metric cards
+        const trialsEl = document.getElementById(`${this.appId}-trials`);
+        const conversionsEl = document.getElementById(`${this.appId}-conversions`);
+        const revenueEl = document.getElementById(`${this.appId}-revenue`);
+        const conversionEl = document.getElementById(`${this.appId}-conversion`);
+        
+        if (trialsEl) trialsEl.textContent = totalTrials.toLocaleString('pt-BR');
+        if (conversionsEl) conversionsEl.textContent = totalSubscribers.toLocaleString('pt-BR');
+        if (revenueEl) revenueEl.textContent = `R$ ${totalRevenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        if (conversionEl) conversionEl.textContent = conversionRate.toFixed(2);
+        
+        // Update overview if needed
+        updateOverviewMetrics();
     }
     
     exportToCSV() {
@@ -247,16 +325,13 @@ class DailyDataTable {
             return;
         }
         
-        // Create CSV header
         const headers = this.columns.map(col => col.label);
         let csv = headers.join(',') + '\n';
         
-        // Add data rows
         data.forEach(row => {
             const values = this.columns.map(col => {
                 let value = row[col.key] || '';
                 
-                // Format values for CSV
                 if (col.type === 'currency' && value) {
                     const num = parseFloat(value);
                     if (!isNaN(num)) {
@@ -270,7 +345,6 @@ class DailyDataTable {
                 } else if (col.type === 'number' && value) {
                     value = Math.round(parseFloat(value));
                 } else if (col.type === 'date' && value) {
-                    // Convert YYYY-MM-DD to DD/MM/YYYY
                     const parts = value.split('-');
                     if (parts.length === 3) {
                         value = `"${parts[2]}/${parts[1]}/${parts[0]}"`;
@@ -283,28 +357,131 @@ class DailyDataTable {
             csv += values.join(',') + '\n';
         });
         
-        // Download CSV
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         const timestamp = new Date().toISOString().split('T')[0];
+        const countryInfo = COUNTRIES[this.currentCountry];
         
         link.setAttribute('href', url);
-        link.setAttribute('download', `${this.appName.toLowerCase()}-daily-data-${timestamp}.csv`);
+        link.setAttribute('download', `${this.appId}-${this.currentCountry}-${countryInfo.name}-${timestamp}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        console.log('✅ CSV exportado com sucesso!');
+        console.log(`✅ CSV exportado: ${countryInfo.name} ${countryInfo.flag}`);
     }
 }
 
-// Initialize the tables when DOM is ready
+// ============================================
+// OVERVIEW METRICS
+// ============================================
+
+function updateOverviewMetrics() {
+    const apps = ['divinetalk', 'divinetv'];
+    const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
+    
+    let globalTrials = 0;
+    let globalRevenue = 0;
+    let globalConversions = 0;
+    let regionRevenues = {};
+    
+    // Calculate metrics for summary tables
+    apps.forEach(app => {
+        countries.forEach(country => {
+            const key = `${app}_${country}`;
+            const stored = localStorage.getItem(key);
+            
+            if (!stored) {
+                // Set placeholder values in summary table
+                const tbody = document.getElementById(app === 'divinetalk' ? 'summaryDivineTalk' : 'summaryDivineTV');
+                const cells = tbody.querySelectorAll(`[data-country="${country}"]`);
+                cells.forEach(cell => {
+                    const metric = cell.dataset.metric;
+                    if (metric === 'trials' || metric === 'revenue' || metric === 'profit') {
+                        cell.textContent = '—';
+                    } else if (metric === 'conversion') {
+                        cell.textContent = '—';
+                    }
+                });
+                return;
+            }
+            
+            const data = JSON.parse(stored);
+            let trials = 0;
+            let revenue = 0;
+            let profit = 0;
+            let subscribers = 0;
+            
+            data.forEach(row => {
+                trials += parseFloat(row.trials) || 0;
+                subscribers += parseFloat(row.subscribers) || 0;
+                
+                const revApple = parseFloat(row.revenueApple) || 0;
+                const revAndroid = parseFloat(row.revenueAndroid) || 0;
+                revenue += revApple + revAndroid;
+                
+                profit += parseFloat(row.netProfit) || 0;
+            });
+            
+            const conversion = trials > 0 ? (subscribers / trials * 100) : 0;
+            
+            // Update global totals
+            globalTrials += trials;
+            globalRevenue += revenue;
+            globalConversions += subscribers;
+            
+            // Track revenue by region
+            regionRevenues[country] = (regionRevenues[country] || 0) + revenue;
+            
+            // Update summary table
+            const tbody = document.getElementById(app === 'divinetalk' ? 'summaryDivineTalk' : 'summaryDivineTV');
+            const trialsCell = tbody.querySelector(`[data-country="${country}"][data-metric="trials"]`);
+            const revenueCell = tbody.querySelector(`[data-country="${country}"][data-metric="revenue"]`);
+            const conversionCell = tbody.querySelector(`[data-country="${country}"][data-metric="conversion"]`);
+            const profitCell = tbody.querySelector(`[data-country="${country}"][data-metric="profit"]`);
+            
+            if (trialsCell) trialsCell.textContent = trials.toLocaleString('pt-BR');
+            if (revenueCell) revenueCell.textContent = `R$ ${revenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            if (conversionCell) conversionCell.textContent = `${conversion.toFixed(2)}%`;
+            if (profitCell) profitCell.textContent = `R$ ${profit.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        });
+    });
+    
+    // Update global stats
+    const globalConversionRate = globalTrials > 0 ? (globalConversions / globalTrials * 100) : 0;
+    const topRegion = Object.keys(regionRevenues).reduce((a, b) => 
+        regionRevenues[a] > regionRevenues[b] ? a : b, 'BR'
+    );
+    
+    const globalTrialsEl = document.getElementById('globalTrials');
+    const globalRevenueEl = document.getElementById('globalRevenue');
+    const globalConversionEl = document.getElementById('globalConversion');
+    const topRegionEl = document.getElementById('topRegion');
+    
+    if (globalTrialsEl) globalTrialsEl.textContent = globalTrials.toLocaleString('pt-BR');
+    if (globalRevenueEl) globalRevenueEl.textContent = `R$ ${globalRevenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    if (globalConversionEl) globalConversionEl.textContent = globalConversionRate.toFixed(2);
+    if (topRegionEl) topRegionEl.textContent = `${COUNTRIES[topRegion].flag} ${COUNTRIES[topRegion].name}`;
+}
+
+// ============================================
+// INITIALIZE
+// ============================================
+
+let tableDivineTalk, tableDivineTV;
+
 document.addEventListener('DOMContentLoaded', () => {
-    const divineTalkTable = new DailyDataTable('DivineTalk');
-    const divineTVTable = new DailyDataTable('DivineTV');
-    console.log('📊 Daily Data Tables initialized!');
-    console.log('💬 Divine Talk table ready');
-    console.log('📺 Divine TV table ready');
+    console.log('✨ Divine Sales Dashboard v2.0 Multi-Regional loaded!');
+    
+    tableDivineTalk = new DailyDataTable('DivineTalk');
+    tableDivineTV = new DailyDataTable('DivineTV');
+    
+    console.log('📊 Tables initialized with multi-regional support');
+    console.log('🌎 Countries:', Object.keys(COUNTRIES).join(', '));
+    
+    updateOverviewMetrics();
 });
+
+document.documentElement.style.scrollBehavior = 'smooth';

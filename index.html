@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <h1>✨ Divine Sales Dashboard</h1>
-            <p class="subtitle">Análise de vendas em tempo real</p>
+            <p class="subtitle">Análise de vendas multi-regional em tempo real</p>
         </header>
 
         <nav class="view-selector">
@@ -32,24 +32,24 @@
                     <div class="stat-card">
                         <div class="stat-icon">🚀</div>
                         <div class="stat-content">
-                            <h3>Trials Hoje</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Carregando...</span>
+                            <h3>Trials Global</h3>
+                            <p class="stat-value" id="globalTrials">—</p>
+                            <span class="stat-label">Todos os países</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">💰</div>
                         <div class="stat-content">
-                            <h3>Revenue Hoje</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Carregando...</span>
+                            <h3>Revenue Global</h3>
+                            <p class="stat-value" id="globalRevenue">—</p>
+                            <span class="stat-label">Total consolidado</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">📈</div>
                         <div class="stat-content">
-                            <h3>Conversão</h3>
-                            <p class="stat-value">—%</p>
+                            <h3>Conversão Média</h3>
+                            <p class="stat-value" id="globalConversion">—%</p>
                             <span class="stat-label">Trial → Paid</span>
                         </div>
                     </div>
@@ -57,49 +57,118 @@
                         <div class="stat-icon">🌎</div>
                         <div class="stat-content">
                             <h3>Top Região</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Carregando...</span>
+                            <p class="stat-value" id="topRegion">—</p>
+                            <span class="stat-label">Por revenue</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="apps-comparison">
-                    <h2>Comparação por App</h2>
-                    <div class="comparison-grid">
-                        <div class="app-card">
-                            <h3>💬 Divine Talk</h3>
-                            <div class="app-stats">
-                                <div class="app-stat">
-                                    <span class="label">Trials</span>
-                                    <span class="value">—</span>
-                                </div>
-                                <div class="app-stat">
-                                    <span class="label">Conversões</span>
-                                    <span class="value">—</span>
-                                </div>
-                                <div class="app-stat">
-                                    <span class="label">Revenue</span>
-                                    <span class="value">—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="app-card">
-                            <h3>📺 Divine TV</h3>
-                            <div class="app-stats">
-                                <div class="app-stat">
-                                    <span class="label">Trials</span>
-                                    <span class="value">—</span>
-                                </div>
-                                <div class="app-stat">
-                                    <span class="label">Conversões</span>
-                                    <span class="value">—</span>
-                                </div>
-                                <div class="app-stat">
-                                    <span class="label">Revenue</span>
-                                    <span class="value">—</span>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Regional Summary Tables -->
+                <div class="regional-summary">
+                    <h2>🌎 Resumo Regional - Divine Talk</h2>
+                    <div class="table-wrapper">
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>País</th>
+                                    <th>Trials</th>
+                                    <th>Revenue</th>
+                                    <th>Conversão %</th>
+                                    <th>Lucro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryDivineTalk">
+                                <tr>
+                                    <td>🇧🇷 Brasil</td>
+                                    <td class="number-cell" data-country="BR" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="BR" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="BR" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="BR" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇺🇸 EUA</td>
+                                    <td class="number-cell" data-country="US" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="US" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="US" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="US" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇨🇦 Canadá</td>
+                                    <td class="number-cell" data-country="CA" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="CA" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="CA" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="CA" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇬🇧 Reino Unido</td>
+                                    <td class="number-cell" data-country="GB" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="GB" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="GB" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="GB" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇦🇺 Austrália</td>
+                                    <td class="number-cell" data-country="AU" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="AU" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="AU" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="AU" data-metric="profit">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="regional-summary">
+                    <h2>🌎 Resumo Regional - Divine TV</h2>
+                    <div class="table-wrapper">
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>País</th>
+                                    <th>Trials</th>
+                                    <th>Revenue</th>
+                                    <th>Conversão %</th>
+                                    <th>Lucro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryDivineTV">
+                                <tr>
+                                    <td>🇧🇷 Brasil</td>
+                                    <td class="number-cell" data-country="BR" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="BR" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="BR" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="BR" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇺🇸 EUA</td>
+                                    <td class="number-cell" data-country="US" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="US" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="US" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="US" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇨🇦 Canadá</td>
+                                    <td class="number-cell" data-country="CA" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="CA" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="CA" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="CA" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇬🇧 Reino Unido</td>
+                                    <td class="number-cell" data-country="GB" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="GB" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="GB" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="GB" data-metric="profit">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🇦🇺 Austrália</td>
+                                    <td class="number-cell" data-country="AU" data-metric="trials">—</td>
+                                    <td class="currency-cell" data-country="AU" data-metric="revenue">—</td>
+                                    <td class="percent-cell" data-country="AU" data-metric="conversion">—</td>
+                                    <td class="currency-cell" data-country="AU" data-metric="profit">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -110,20 +179,43 @@
                 <div class="app-header">
                     <h2>💬 Divine Talk - Análise Detalhada</h2>
                 </div>
+
+                <!-- Country Tabs -->
+                <div class="country-tabs">
+                    <button class="country-tab active" data-app="divinetalk" data-country="BR">
+                        🇧🇷 Brasil
+                    </button>
+                    <button class="country-tab" data-app="divinetalk" data-country="US">
+                        🇺🇸 EUA
+                    </button>
+                    <button class="country-tab" data-app="divinetalk" data-country="CA">
+                        🇨🇦 Canadá
+                    </button>
+                    <button class="country-tab" data-app="divinetalk" data-country="GB">
+                        🇬🇧 Reino Unido
+                    </button>
+                    <button class="country-tab" data-app="divinetalk" data-country="AU">
+                        🇦🇺 Austrália
+                    </button>
+                    <button class="country-tab" data-app="divinetalk" data-country="GLOBAL">
+                        🌎 Global
+                    </button>
+                </div>
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-content">
-                            <h3>Trials Hoje</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Novos usuários testando</span>
+                            <h3>Trials</h3>
+                            <p class="stat-value" id="divinetalk-trials">—</p>
+                            <span class="stat-label">Total do período</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">✅</div>
                         <div class="stat-content">
                             <h3>Conversões</h3>
-                            <p class="stat-value">—</p>
+                            <p class="stat-value" id="divinetalk-conversions">—</p>
                             <span class="stat-label">Trial → Paid</span>
                         </div>
                     </div>
@@ -131,32 +223,16 @@
                         <div class="stat-icon">💵</div>
                         <div class="stat-content">
                             <h3>Revenue</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Hoje</span>
+                            <p class="stat-value" id="divinetalk-revenue">—</p>
+                            <span class="stat-label">Total</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🎯</div>
                         <div class="stat-content">
                             <h3>Taxa de Conversão</h3>
-                            <p class="stat-value">—%</p>
-                            <span class="stat-label">Últimos 7 dias</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="region-split">
-                    <h3>🌎 Distribuição por Região</h3>
-                    <div class="region-grid">
-                        <div class="region-card">
-                            <h4>🇧🇷 Brasil</h4>
-                            <p class="region-value">— trials</p>
-                            <p class="region-revenue">R$ —</p>
-                        </div>
-                        <div class="region-card">
-                            <h4>🇺🇸 Estados Unidos</h4>
-                            <p class="region-value">— trials</p>
-                            <p class="region-revenue">$ —</p>
+                            <p class="stat-value" id="divinetalk-conversion">—%</p>
+                            <span class="stat-label">Período total</span>
                         </div>
                     </div>
                 </div>
@@ -164,7 +240,7 @@
                 <!-- Tabela de Dados Diários - Divine Talk -->
                 <div class="daily-data-section">
                     <div class="section-header">
-                        <h2>📊 Dados Diários - Divine Talk</h2>
+                        <h2>📊 Dados Diários - <span id="divinetalk-country-label">Brasil 🇧🇷</span></h2>
                         <div class="section-actions">
                             <button id="addRowBtnDivineTalk" class="action-btn add-btn">
                                 ➕ Adicionar Linha
@@ -210,20 +286,43 @@
                 <div class="app-header">
                     <h2>📺 Divine TV - Análise Detalhada</h2>
                 </div>
+
+                <!-- Country Tabs -->
+                <div class="country-tabs">
+                    <button class="country-tab active" data-app="divinetv" data-country="BR">
+                        🇧🇷 Brasil
+                    </button>
+                    <button class="country-tab" data-app="divinetv" data-country="US">
+                        🇺🇸 EUA
+                    </button>
+                    <button class="country-tab" data-app="divinetv" data-country="CA">
+                        🇨🇦 Canadá
+                    </button>
+                    <button class="country-tab" data-app="divinetv" data-country="GB">
+                        🇬🇧 Reino Unido
+                    </button>
+                    <button class="country-tab" data-app="divinetv" data-country="AU">
+                        🇦🇺 Austrália
+                    </button>
+                    <button class="country-tab" data-app="divinetv" data-country="GLOBAL">
+                        🌎 Global
+                    </button>
+                </div>
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-content">
-                            <h3>Trials Hoje</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Novos usuários testando</span>
+                            <h3>Trials</h3>
+                            <p class="stat-value" id="divinetv-trials">—</p>
+                            <span class="stat-label">Total do período</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">✅</div>
                         <div class="stat-content">
                             <h3>Conversões</h3>
-                            <p class="stat-value">—</p>
+                            <p class="stat-value" id="divinetv-conversions">—</p>
                             <span class="stat-label">Trial → Paid</span>
                         </div>
                     </div>
@@ -231,32 +330,16 @@
                         <div class="stat-icon">💵</div>
                         <div class="stat-content">
                             <h3>Revenue</h3>
-                            <p class="stat-value">—</p>
-                            <span class="stat-label">Hoje</span>
+                            <p class="stat-value" id="divinetv-revenue">—</p>
+                            <span class="stat-label">Total</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🎯</div>
                         <div class="stat-content">
                             <h3>Taxa de Conversão</h3>
-                            <p class="stat-value">—%</p>
-                            <span class="stat-label">Últimos 7 dias</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="region-split">
-                    <h3>🌎 Distribuição por Região</h3>
-                    <div class="region-grid">
-                        <div class="region-card">
-                            <h4>🇧🇷 Brasil</h4>
-                            <p class="region-value">— trials</p>
-                            <p class="region-revenue">R$ —</p>
-                        </div>
-                        <div class="region-card">
-                            <h4>🇺🇸 Estados Unidos</h4>
-                            <p class="region-value">— trials</p>
-                            <p class="region-revenue">$ —</p>
+                            <p class="stat-value" id="divinetv-conversion">—%</p>
+                            <span class="stat-label">Período total</span>
                         </div>
                     </div>
                 </div>
@@ -264,7 +347,7 @@
                 <!-- Tabela de Dados Diários - Divine TV -->
                 <div class="daily-data-section">
                     <div class="section-header">
-                        <h2>📊 Dados Diários - Divine TV</h2>
+                        <h2>📊 Dados Diários - <span id="divinetv-country-label">Brasil 🇧🇷</span></h2>
                         <div class="section-actions">
                             <button id="addRowBtnDivineTV" class="action-btn add-btn">
                                 ➕ Adicionar Linha
@@ -307,7 +390,7 @@
         </main>
 
         <footer>
-            <p>✨ Divine Sales Dashboard v1.0 | Dados atualizados em tempo real</p>
+            <p>✨ Divine Sales Dashboard v2.0 Multi-Regional | Dados atualizados em tempo real</p>
         </footer>
     </div>
 
