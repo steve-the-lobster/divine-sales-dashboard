@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Sales Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Divine Sales Dashboard</h1>
+            <p class="subtitle">Análise de vendas em tempo real</p>
+        </header>
+
+        <nav class="view-selector">
+            <button class="view-btn active" data-view="overview">
+                📊 Visão Geral
+            </button>
+            <button class="view-btn" data-view="divinetalk">
+                💬 Divine Talk
+            </button>
+            <button class="view-btn" data-view="divinetv">
+                📺 Divine TV
+            </button>
+        </nav>
+
+        <main id="content">
+            <!-- Overview View -->
+            <div class="view active" id="view-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🚀</div>
+                        <div class="stat-content">
+                            <h3>Trials Hoje</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Carregando...</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-content">
+                            <h3>Revenue Hoje</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Carregando...</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <h3>Conversão</h3>
+                            <p class="stat-value">—%</p>
+                            <span class="stat-label">Trial → Paid</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌎</div>
+                        <div class="stat-content">
+                            <h3>Top Região</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="apps-comparison">
+                    <h2>Comparação por App</h2>
+                    <div class="comparison-grid">
+                        <div class="app-card">
+                            <h3>💬 Divine Talk</h3>
+                            <div class="app-stats">
+                                <div class="app-stat">
+                                    <span class="label">Trials</span>
+                                    <span class="value">—</span>
+                                </div>
+                                <div class="app-stat">
+                                    <span class="label">Conversões</span>
+                                    <span class="value">—</span>
+                                </div>
+                                <div class="app-stat">
+                                    <span class="label">Revenue</span>
+                                    <span class="value">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="app-card">
+                            <h3>📺 Divine TV</h3>
+                            <div class="app-stats">
+                                <div class="app-stat">
+                                    <span class="label">Trials</span>
+                                    <span class="value">—</span>
+                                </div>
+                                <div class="app-stat">
+                                    <span class="label">Conversões</span>
+                                    <span class="value">—</span>
+                                </div>
+                                <div class="app-stat">
+                                    <span class="label">Revenue</span>
+                                    <span class="value">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divine Talk View -->
+            <div class="view" id="view-divinetalk">
+                <div class="app-header">
+                    <h2>💬 Divine Talk - Análise Detalhada</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Trials Hoje</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Novos usuários testando</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3>Conversões</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Trial → Paid</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-content">
+                            <h3>Revenue</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Hoje</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <h3>Taxa de Conversão</h3>
+                            <p class="stat-value">—%</p>
+                            <span class="stat-label">Últimos 7 dias</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="region-split">
+                    <h3>🌎 Distribuição por Região</h3>
+                    <div class="region-grid">
+                        <div class="region-card">
+                            <h4>🇧🇷 Brasil</h4>
+                            <p class="region-value">— trials</p>
+                            <p class="region-revenue">R$ —</p>
+                        </div>
+                        <div class="region-card">
+                            <h4>🇺🇸 Estados Unidos</h4>
+                            <p class="region-value">— trials</p>
+                            <p class="region-revenue">$ —</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divine TV View -->
+            <div class="view" id="view-divinetv">
+                <div class="app-header">
+                    <h2>📺 Divine TV - Análise Detalhada</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Trials Hoje</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Novos usuários testando</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3>Conversões</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Trial → Paid</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-content">
+                            <h3>Revenue</h3>
+                            <p class="stat-value">—</p>
+                            <span class="stat-label">Hoje</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <h3>Taxa de Conversão</h3>
+                            <p class="stat-value">—%</p>
+                            <span class="stat-label">Últimos 7 dias</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="region-split">
+                    <h3>🌎 Distribuição por Região</h3>
+                    <div class="region-grid">
+                        <div class="region-card">
+                            <h4>🇧🇷 Brasil</h4>
+                            <p class="region-value">— trials</p>
+                            <p class="region-revenue">R$ —</p>
+                        </div>
+                        <div class="region-card">
+                            <h4>🇺🇸 Estados Unidos</h4>
+                            <p class="region-value">— trials</p>
+                            <p class="region-revenue">$ —</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>✨ Divine Sales Dashboard v1.0 | Dados atualizados em tempo real</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

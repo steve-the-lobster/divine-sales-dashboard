@@ -1,0 +1,325 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --divine-blue: #3b82f6;
+    --divine-gold: #f59e0b;
+    --divine-white: #ffffff;
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --border-color: #475569;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, var(--divine-blue) 0%, #2563eb 100%);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+}
+
+header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, var(--divine-white), var(--divine-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 300;
+}
+
+.view-selector {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.view-btn {
+    flex: 1;
+    min-width: 200px;
+    padding: 20px 30px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border: 3px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.view-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    border-color: var(--divine-blue);
+}
+
+.view-btn.active {
+    background: linear-gradient(135deg, var(--divine-blue) 0%, #2563eb 100%);
+    border-color: var(--divine-blue);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+}
+
+.view {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    border-color: var(--divine-blue);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-content h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(to right, var(--divine-blue), var(--divine-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.apps-comparison,
+.region-split {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.apps-comparison h2,
+.region-split h3 {
+    margin-bottom: 25px;
+    color: var(--divine-gold);
+    font-size: 1.5rem;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.app-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.app-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--divine-blue);
+}
+
+.app-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--divine-white);
+}
+
+.app-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.app-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.app-stat:last-child {
+    border-bottom: none;
+}
+
+.app-stat .label {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.app-stat .value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--divine-blue);
+}
+
+.app-header {
+    margin-bottom: 30px;
+}
+
+.app-header h2 {
+    font-size: 2rem;
+    color: var(--divine-gold);
+}
+
+.region-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.region-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.region-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--divine-gold);
+}
+
+.region-card h4 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: var(--divine-white);
+}
+
+.region-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--divine-blue);
+    margin-bottom: 8px;
+}
+
+.region-revenue {
+    font-size: 1.2rem;
+    color: var(--divine-gold);
+    font-weight: 600;
+}
+
+footer {
+    text-align: center;
+    margin-top: 60px;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .view-btn {
+        min-width: 150px;
+        padding: 15px 20px;
+        font-size: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        min-width: auto;
+    }
+
+    .comparison-grid,
+    .region-grid {
+        grid-template-columns: 1fr;
+    }
+}
