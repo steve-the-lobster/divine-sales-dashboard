@@ -92,7 +92,9 @@ class DailyDataTable {
         this.tableBody = document.getElementById(`tableBody${suffix}`);
         this.addRowBtn = document.getElementById(`addRowBtn${suffix}`);
         this.exportCsvBtn = document.getElementById(`exportCsvBtn${suffix}`);
+        this.periodFilter = document.getElementById(`periodFilter-${this.appId}`);
         this.currentCountry = 'BR';
+        this.selectedPeriod = 'all';
         
         this.columns = [
             { key: 'date', label: 'Data', type: 'date' },
@@ -115,12 +117,57 @@ class DailyDataTable {
         this.loadData();
         this.addRowBtn.addEventListener('click', () => this.addRow());
         this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
+        this.periodFilter.addEventListener('change', () => {
+            this.selectedPeriod = this.periodFilter.value;
+            this.updateMetrics();
+        });
     }
     
     switchCountry(country) {
         this.currentCountry = country;
+        this.selectedPeriod = 'all';
         this.loadData();
+        this.populatePeriodFilter();
         this.updateMetrics();
+    }
+    
+    populatePeriodFilter() {
+        const data = this.getData();
+        const periods = new Set();
+        
+        data.forEach(row => {
+            if (row.date) {
+                // Extract YYYY-MM from date
+                const yearMonth = row.date.substring(0, 7);
+                periods.add(yearMonth);
+            }
+        });
+        
+        // Sort periods descending (newest first)
+        const sortedPeriods = Array.from(periods).sort().reverse();
+        
+        // Populate dropdown
+        this.periodFilter.innerHTML = '<option value="all">Todo o período</option>';
+        sortedPeriods.forEach(period => {
+            const [year, month] = period.split('-');
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const monthName = monthNames[parseInt(month) - 1];
+            const option = document.createElement('option');
+            option.value = period;
+            option.textContent = `${monthName} ${year}`;
+            this.periodFilter.appendChild(option);
+        });
+        
+        // Reset selected period
+        this.periodFilter.value = this.selectedPeriod;
+    }
+    
+    filterDataByPeriod(data, period) {
+        if (period === 'all') {
+            return data;
+        }
+        return data.filter(row => row.date && row.date.startsWith(period));
     }
     
     loadData() {
@@ -133,6 +180,7 @@ class DailyDataTable {
             data.forEach((row, index) => this.renderRow(row, index));
         }
         
+        this.populatePeriodFilter();
         this.updateMetrics();
     }
     
@@ -276,33 +324,49 @@ class DailyDataTable {
     }
     
     updateMetrics() {
-        const data = this.getData();
+        const allData = this.getData();
+        const data = this.filterDataByPeriod(allData, this.selectedPeriod);
         
         let totalTrials = 0;
-        let totalSubscribers = 0;
-        let totalRevenue = 0;
+        let totalValorGasto = 0;
+        let totalFaturamento = 0;
         
         data.forEach(row => {
             totalTrials += parseFloat(row.trials) || 0;
-            totalSubscribers += parseFloat(row.novosAssinantes) || 0;
+            totalValorGasto += parseFloat(row.valorGasto) || 0;
             
-            const revenueApple = parseFloat(row.faturamentoApple) || 0;
-            const revenueAndroid = parseFloat(row.faturamentoAndroid) || 0;
-            totalRevenue += revenueApple + revenueAndroid;
+            const faturamentoApple = parseFloat(row.faturamentoApple) || 0;
+            const faturamentoAndroid = parseFloat(row.faturamentoAndroid) || 0;
+            totalFaturamento += faturamentoApple + faturamentoAndroid;
         });
         
-        const conversionRate = totalTrials > 0 ? (totalSubscribers / totalTrials * 100) : 0;
+        const custoPorTrial = totalTrials > 0 ? (totalValorGasto / totalTrials) : 0;
+        const lucroBruto = totalFaturamento - totalValorGasto;
+        
+        // Get currency symbol based on country
+        const currencySymbol = COUNTRIES[this.currentCountry].currency;
         
         // Update metric cards
+        const faturamentoEl = document.getElementById(`${this.appId}-faturamento`);
         const trialsEl = document.getElementById(`${this.appId}-trials`);
-        const conversionsEl = document.getElementById(`${this.appId}-conversions`);
-        const revenueEl = document.getElementById(`${this.appId}-revenue`);
-        const conversionEl = document.getElementById(`${this.appId}-conversion`);
+        const custoTrialEl = document.getElementById(`${this.appId}-custoTrial`);
+        const lucroBrutoEl = document.getElementById(`${this.appId}-lucroBruto`);
         
-        if (trialsEl) trialsEl.textContent = totalTrials.toLocaleString('pt-BR');
-        if (conversionsEl) conversionsEl.textContent = totalSubscribers.toLocaleString('pt-BR');
-        if (revenueEl) revenueEl.textContent = `R$ ${totalRevenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        if (conversionEl) conversionEl.textContent = conversionRate.toFixed(2);
+        if (faturamentoEl) {
+            faturamentoEl.textContent = `${currencySymbol} ${totalFaturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        if (trialsEl) {
+            trialsEl.textContent = totalTrials.toLocaleString('pt-BR');
+        }
+        if (custoTrialEl) {
+            custoTrialEl.textContent = `${currencySymbol} ${custoPorTrial.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        if (lucroBrutoEl) {
+            const isNegative = lucroBruto < 0;
+            const lucroText = `${currencySymbol} ${Math.abs(lucroBruto).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            lucroBrutoEl.textContent = isNegative ? `- ${lucroText}` : lucroText;
+            lucroBrutoEl.style.color = isNegative ? 'var(--danger)' : '';
+        }
         
         // Update overview if needed
         updateOverviewMetrics();

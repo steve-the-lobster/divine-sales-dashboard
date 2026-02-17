@@ -785,6 +785,60 @@ footer {
     }
 }
 
+/* Period Filter */
+.period-filter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    padding: var(--space-lg);
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+}
+
+.period-filter label {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.period-filter select {
+    flex: 1;
+    max-width: 300px;
+    padding: var(--space-md) var(--space-lg);
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-family: inherit;
+    box-shadow: var(--shadow-sm);
+}
+
+.period-filter select:hover {
+    border-color: var(--divine-blue);
+    box-shadow: var(--shadow-blue);
+    transform: translateY(-2px);
+}
+
+.period-filter select:focus {
+    outline: none;
+    border-color: var(--divine-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), var(--shadow-blue);
+}
+
+.period-filter select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: var(--space-md);
+}
+
 /* Country Tabs */
 .country-tabs {
     display: flex;
@@ -958,8 +1012,19 @@ footer {
     }
 }
 
-/* Mobile Responsiveness for Country Tabs */
+/* Mobile Responsiveness for Country Tabs and Period Filter */
 @media (max-width: 768px) {
+    .period-filter {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-sm);
+        padding: var(--space-md);
+    }
+
+    .period-filter select {
+        max-width: 100%;
+    }
+
     .country-tabs {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -989,6 +1054,19 @@ footer {
 }
 
 @media (max-width: 480px) {
+    .period-filter {
+        padding: var(--space-sm);
+    }
+
+    .period-filter label {
+        font-size: 1rem;
+    }
+
+    .period-filter select {
+        font-size: 0.938rem;
+        padding: var(--space-sm) var(--space-md);
+    }
+
     .country-tabs {
         padding: var(--space-xs);
     }
