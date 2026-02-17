@@ -1423,3 +1423,217 @@ footer {
         border-right: none;
     }
 }
+
+/* ============================================
+   FINANCEIRO VIEW
+   ============================================ */
+
+.financial-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.summary-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--divine-blue);
+}
+
+.summary-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.summary-content {
+    flex: 1;
+}
+
+.summary-content h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.summary-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--divine-gold);
+    margin-bottom: var(--space-xs);
+}
+
+.summary-label {
+    font-size: 0.813rem;
+    color: var(--text-muted);
+}
+
+.financial-section {
+    margin-bottom: var(--space-2xl);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.financial-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.financial-section .section-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--divine-gold);
+}
+
+.financial-table {
+    width: 100%;
+}
+
+.financial-table th {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.financial-table td {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.financial-table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.financial-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.financial-table input,
+.financial-table select {
+    width: 100%;
+    padding: var(--space-sm);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.938rem;
+    transition: all var(--transition-fast);
+}
+
+.financial-table input:focus,
+.financial-table select:focus {
+    outline: none;
+    border-color: var(--divine-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.financial-table input[type="date"] {
+    cursor: pointer;
+}
+
+.financial-table select {
+    cursor: pointer;
+}
+
+.status-select {
+    font-weight: 600;
+}
+
+.status-select option[value="Pago"] {
+    color: var(--success);
+}
+
+.status-select option[value="Pendente"] {
+    color: var(--danger);
+}
+
+.status-pago {
+    color: var(--success) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: var(--success) !important;
+}
+
+.status-pendente {
+    color: var(--danger) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: var(--danger) !important;
+}
+
+.delete-btn {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+.delete-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive Adjustments for Financial View */
+@media (max-width: 768px) {
+    .financial-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-card {
+        padding: var(--space-lg);
+    }
+    
+    .summary-value {
+        font-size: 1.5rem;
+    }
+    
+    .financial-section {
+        padding: var(--space-lg);
+        margin-left: calc(-1 * var(--space-sm));
+        margin-right: calc(-1 * var(--space-sm));
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+    
+    .financial-table {
+        font-size: 0.813rem;
+    }
+    
+    .financial-table th,
+    .financial-table td {
+        padding: var(--space-sm);
+    }
+}

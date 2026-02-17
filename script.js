@@ -990,3 +990,316 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.documentElement.style.scrollBehavior = 'smooth';
+
+// ============================================
+// FINANCIAL MANAGER
+// ============================================
+
+class FinancialManager {
+    constructor() {
+        this.currentMonth = new Date().toISOString().substring(0, 7);
+        this.tables = {
+            contasPagar: [],
+            custosFixos: [],
+            custosVariaveis: [],
+            extratoCartao: []
+        };
+        this.categories = ['Marketing', 'Operacional', 'Tecnologia', 'Outros'];
+        this.init();
+    }
+
+    init() {
+        this.populatePeriodFilter();
+        this.loadData(this.currentMonth);
+        this.renderAllTables();
+        this.updateSummary();
+        this.attachEventListeners();
+    }
+
+    populatePeriodFilter() {
+        const select = document.getElementById('periodFilterFinanceiro');
+        if (!select) return;
+
+        const currentDate = new Date();
+        const options = [];
+
+        // Generate last 12 months
+        for (let i = 0; i < 12; i++) {
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+            const monthYear = date.toISOString().substring(0, 7);
+            const monthName = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            options.push(`<option value="${monthYear}">${capitalizedMonth}</option>`);
+        }
+
+        select.innerHTML = options.join('');
+        select.value = this.currentMonth;
+    }
+
+    loadData(month) {
+        for (const table in this.tables) {
+            const key = `financial_${table}_${month}`;
+            const data = localStorage.getItem(key);
+            this.tables[table] = data ? JSON.parse(data) : [];
+        }
+    }
+
+    saveData(tableName) {
+        const key = `financial_${tableName}_${this.currentMonth}`;
+        localStorage.setItem(key, JSON.stringify(this.tables[tableName]));
+        this.updateSummary();
+    }
+
+    renderAllTables() {
+        this.renderContasPagar();
+        this.renderCustosFixos();
+        this.renderCustosVariaveis();
+        this.renderExtratoCartao();
+    }
+
+    renderContasPagar() {
+        const tbody = document.getElementById('tbodyContasPagar');
+        if (!tbody) return;
+
+        if (this.tables.contasPagar.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhuma conta cadastrada</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.tables.contasPagar.map((item, index) => `
+            <tr>
+                <td><input type="date" value="${item.vencimento}" data-table="contasPagar" data-index="${index}" data-field="vencimento"></td>
+                <td><input type="text" value="${item.descricao}" data-table="contasPagar" data-index="${index}" data-field="descricao" placeholder="Descrição"></td>
+                <td><input type="number" value="${item.valor}" data-table="contasPagar" data-index="${index}" data-field="valor" placeholder="0.00" step="0.01"></td>
+                <td>
+                    <select class="status-select ${item.status === 'Pago' ? 'status-pago' : 'status-pendente'}" data-table="contasPagar" data-index="${index}" data-field="status">
+                        <option value="Pendente" ${item.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                        <option value="Pago" ${item.status === 'Pago' ? 'selected' : ''}>Pago</option>
+                    </select>
+                </td>
+                <td class="actions-col">
+                    <button class="delete-btn" data-table="contasPagar" data-index="${index}">🗑️ Deletar</button>
+                </td>
+            </tr>
+        `).join('');
+
+        this.attachTableEventListeners('contasPagar');
+    }
+
+    renderCustosFixos() {
+        const tbody = document.getElementById('tbodyCustosFixos');
+        if (!tbody) return;
+
+        if (this.tables.custosFixos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum custo fixo cadastrado</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.tables.custosFixos.map((item, index) => `
+            <tr>
+                <td><input type="text" value="${item.descricao}" data-table="custosFixos" data-index="${index}" data-field="descricao" placeholder="Ex: Aluguel"></td>
+                <td><input type="number" value="${item.valor}" data-table="custosFixos" data-index="${index}" data-field="valor" placeholder="0.00" step="0.01"></td>
+                <td class="actions-col">
+                    <button class="delete-btn" data-table="custosFixos" data-index="${index}">🗑️ Deletar</button>
+                </td>
+            </tr>
+        `).join('');
+
+        this.attachTableEventListeners('custosFixos');
+    }
+
+    renderCustosVariaveis() {
+        const tbody = document.getElementById('tbodyCustosVariaveis');
+        if (!tbody) return;
+
+        if (this.tables.custosVariaveis.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum custo variável cadastrado</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.tables.custosVariaveis.map((item, index) => `
+            <tr>
+                <td><input type="date" value="${item.data}" data-table="custosVariaveis" data-index="${index}" data-field="data"></td>
+                <td><input type="text" value="${item.descricao}" data-table="custosVariaveis" data-index="${index}" data-field="descricao" placeholder="Descrição"></td>
+                <td><input type="number" value="${item.valor}" data-table="custosVariaveis" data-index="${index}" data-field="valor" placeholder="0.00" step="0.01"></td>
+                <td>
+                    <select data-table="custosVariaveis" data-index="${index}" data-field="categoria">
+                        ${this.categories.map(cat => `<option value="${cat}" ${item.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                    </select>
+                </td>
+                <td class="actions-col">
+                    <button class="delete-btn" data-table="custosVariaveis" data-index="${index}">🗑️ Deletar</button>
+                </td>
+            </tr>
+        `).join('');
+
+        this.attachTableEventListeners('custosVariaveis');
+    }
+
+    renderExtratoCartao() {
+        const tbody = document.getElementById('tbodyExtratoCartao');
+        if (!tbody) return;
+
+        if (this.tables.extratoCartao.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum lançamento cadastrado</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.tables.extratoCartao.map((item, index) => `
+            <tr>
+                <td><input type="date" value="${item.data}" data-table="extratoCartao" data-index="${index}" data-field="data"></td>
+                <td><input type="text" value="${item.descricao}" data-table="extratoCartao" data-index="${index}" data-field="descricao" placeholder="Descrição"></td>
+                <td><input type="number" value="${item.valor}" data-table="extratoCartao" data-index="${index}" data-field="valor" placeholder="0.00" step="0.01"></td>
+                <td>
+                    <select data-table="extratoCartao" data-index="${index}" data-field="categoria">
+                        ${this.categories.map(cat => `<option value="${cat}" ${item.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                    </select>
+                </td>
+                <td class="actions-col">
+                    <button class="delete-btn" data-table="extratoCartao" data-index="${index}">🗑️ Deletar</button>
+                </td>
+            </tr>
+        `).join('');
+
+        this.attachTableEventListeners('extratoCartao');
+    }
+
+    attachTableEventListeners(tableName) {
+        // Input change listeners
+        const inputs = document.querySelectorAll(`[data-table="${tableName}"]`);
+        inputs.forEach(input => {
+            if (input.tagName === 'INPUT' || input.tagName === 'SELECT') {
+                input.addEventListener('change', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    const field = e.target.dataset.field;
+                    
+                    if (field === 'status' && e.target.tagName === 'SELECT') {
+                        // Update status class
+                        e.target.className = e.target.value === 'Pago' ? 'status-select status-pago' : 'status-select status-pendente';
+                    }
+                    
+                    this.tables[tableName][index][field] = e.target.value;
+                    this.saveData(tableName);
+                });
+            }
+        });
+
+        // Delete button listeners
+        const deleteButtons = document.querySelectorAll(`button[data-table="${tableName}"]`);
+        deleteButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                if (confirm('Tem certeza que deseja deletar este item?')) {
+                    this.tables[tableName].splice(index, 1);
+                    this.saveData(tableName);
+                    this.renderTable(tableName);
+                }
+            });
+        });
+    }
+
+    renderTable(tableName) {
+        switch(tableName) {
+            case 'contasPagar':
+                this.renderContasPagar();
+                break;
+            case 'custosFixos':
+                this.renderCustosFixos();
+                break;
+            case 'custosVariaveis':
+                this.renderCustosVariaveis();
+                break;
+            case 'extratoCartao':
+                this.renderExtratoCartao();
+                break;
+        }
+    }
+
+    addRow(tableName) {
+        const today = new Date().toISOString().substring(0, 10);
+        
+        const newRow = {
+            contasPagar: {
+                vencimento: today,
+                descricao: '',
+                valor: 0,
+                status: 'Pendente'
+            },
+            custosFixos: {
+                descricao: '',
+                valor: 0
+            },
+            custosVariaveis: {
+                data: today,
+                descricao: '',
+                valor: 0,
+                categoria: 'Outros'
+            },
+            extratoCartao: {
+                data: today,
+                descricao: '',
+                valor: 0,
+                categoria: 'Outros'
+            }
+        };
+
+        this.tables[tableName].push(newRow[tableName]);
+        this.saveData(tableName);
+        this.renderTable(tableName);
+    }
+
+    updateSummary() {
+        // Total a Pagar (apenas contas pendentes)
+        const totalPagar = this.tables.contasPagar
+            .filter(item => item.status === 'Pendente')
+            .reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+        
+        // Custos Fixos
+        const totalFixos = this.tables.custosFixos
+            .reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+        
+        // Custos Variáveis
+        const totalVariaveis = this.tables.custosVariaveis
+            .reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+        
+        // Extrato Cartão
+        const totalCartao = this.tables.extratoCartao
+            .reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+
+        // Update UI
+        document.getElementById('totalContasPagar').textContent = formatCurrency(totalPagar, 'BR');
+        document.getElementById('totalCustosFixos').textContent = formatCurrency(totalFixos, 'BR');
+        document.getElementById('totalCustosVariaveis').textContent = formatCurrency(totalVariaveis, 'BR');
+        document.getElementById('totalExtratoCartao').textContent = formatCurrency(totalCartao, 'BR');
+    }
+
+    attachEventListeners() {
+        // Period filter
+        const periodFilter = document.getElementById('periodFilterFinanceiro');
+        if (periodFilter) {
+            periodFilter.addEventListener('change', (e) => {
+                this.currentMonth = e.target.value;
+                this.loadData(this.currentMonth);
+                this.renderAllTables();
+                this.updateSummary();
+            });
+        }
+
+        // Add buttons
+        document.getElementById('addContasPagar')?.addEventListener('click', () => this.addRow('contasPagar'));
+        document.getElementById('addCustosFixos')?.addEventListener('click', () => this.addRow('custosFixos'));
+        document.getElementById('addCustosVariaveis')?.addEventListener('click', () => this.addRow('custosVariaveis'));
+        document.getElementById('addExtratoCartao')?.addEventListener('click', () => this.addRow('extratoCartao'));
+    }
+}
+
+// Initialize Financial Manager when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.financialManager = new FinancialManager();
+        console.log('💰 Financial Manager initialized');
+    });
+} else {
+    window.financialManager = new FinancialManager();
+    console.log('💰 Financial Manager initialized');
+}

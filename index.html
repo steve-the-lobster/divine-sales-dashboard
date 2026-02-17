@@ -24,6 +24,9 @@
             <button class="view-btn" data-view="divinetv">
                 📺 Divine TV
             </button>
+            <button class="view-btn" data-view="financeiro">
+                💰 Financeiro
+            </button>
         </nav>
 
         <main id="content">
@@ -475,6 +478,149 @@
                         <button class="load-more-btn">
                             📄 Carregar mais...
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financeiro View -->
+            <div class="view" id="view-financeiro">
+                <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--divine-gold);">💰 Financeiro - Gestão Mensal</h2>
+                
+                <!-- Filtro de Período -->
+                <div class="period-filter">
+                    <label>📅 Mês:</label>
+                    <select id="periodFilterFinanceiro">
+                        <option value="2026-02">Fevereiro 2026</option>
+                    </select>
+                </div>
+                
+                <!-- Cards de Resumo -->
+                <div class="financial-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon">💰</div>
+                        <div class="summary-content">
+                            <h3>Total a Pagar</h3>
+                            <p class="summary-value" id="totalContasPagar">R$ 0,00</p>
+                            <span class="summary-label">Contas pendentes</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">🏢</div>
+                        <div class="summary-content">
+                            <h3>Custos Fixos</h3>
+                            <p class="summary-value" id="totalCustosFixos">R$ 0,00</p>
+                            <span class="summary-label">Mensal</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">📊</div>
+                        <div class="summary-content">
+                            <h3>Custos Variáveis</h3>
+                            <p class="summary-value" id="totalCustosVariaveis">R$ 0,00</p>
+                            <span class="summary-label">No mês</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">💳</div>
+                        <div class="summary-content">
+                            <h3>Extrato Cartão</h3>
+                            <p class="summary-value" id="totalExtratoCartao">R$ 0,00</p>
+                            <span class="summary-label">No mês</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabela 1: Contas a Pagar -->
+                <div class="financial-section">
+                    <div class="section-header">
+                        <h3>📋 Contas a Pagar</h3>
+                        <button class="action-btn add-btn" id="addContasPagar">➕ Adicionar</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableContasPagar" class="editable-table financial-table">
+                            <thead>
+                                <tr>
+                                    <th>Vencimento</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th class="actions-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyContasPagar">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tabela 2: Custos Fixos -->
+                <div class="financial-section">
+                    <div class="section-header">
+                        <h3>🏢 Custos Fixos</h3>
+                        <button class="action-btn add-btn" id="addCustosFixos">➕ Adicionar</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableCustosFixos" class="editable-table financial-table">
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Valor Mensal</th>
+                                    <th class="actions-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCustosFixos">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tabela 3: Custos Variáveis -->
+                <div class="financial-section">
+                    <div class="section-header">
+                        <h3>📊 Custos Variáveis</h3>
+                        <button class="action-btn add-btn" id="addCustosVariaveis">➕ Adicionar</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableCustosVariaveis" class="editable-table financial-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Categoria</th>
+                                    <th class="actions-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCustosVariaveis">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tabela 4: Extrato Cartão -->
+                <div class="financial-section">
+                    <div class="section-header">
+                        <h3>💳 Extrato Cartão</h3>
+                        <button class="action-btn add-btn" id="addExtratoCartao">➕ Adicionar</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableExtratoCartao" class="editable-table financial-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Categoria</th>
+                                    <th class="actions-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyExtratoCartao">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
