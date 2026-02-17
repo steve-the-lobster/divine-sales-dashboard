@@ -346,17 +346,13 @@ class DailyDataTable {
         // Get currency symbol based on country
         const currencySymbol = COUNTRIES[this.currentCountry].currency;
         
-        // Update metric cards
+        // Update metric cards (only 3 now: Faturamento, Custo por Trial, Lucro Bruto)
         const faturamentoEl = document.getElementById(`${this.appId}-faturamento`);
-        const trialsEl = document.getElementById(`${this.appId}-trials`);
         const custoTrialEl = document.getElementById(`${this.appId}-custoTrial`);
         const lucroBrutoEl = document.getElementById(`${this.appId}-lucroBruto`);
         
         if (faturamentoEl) {
             faturamentoEl.textContent = `${currencySymbol} ${totalFaturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        }
-        if (trialsEl) {
-            trialsEl.textContent = totalTrials.toLocaleString('pt-BR');
         }
         if (custoTrialEl) {
             custoTrialEl.textContent = `${currencySymbol} ${custoPorTrial.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
