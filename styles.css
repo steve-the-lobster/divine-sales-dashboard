@@ -450,6 +450,56 @@ footer {
     box-shadow: var(--shadow-lg);
 }
 
+/* Load More Button */
+.load-more-container {
+    text-align: center;
+    padding: var(--space-lg) 0;
+    margin-top: var(--space-md);
+}
+
+.load-more-btn {
+    background: linear-gradient(135deg, var(--divine-blue) 0%, #2563eb 100%);
+    color: var(--divine-white);
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.load-more-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width var(--transition-slow), height var(--transition-slow);
+}
+
+.load-more-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.load-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-blue), var(--shadow-md);
+}
+
+.load-more-btn:active {
+    transform: translateY(0);
+}
+
 .section-header {
     display: flex;
     justify-content: space-between;

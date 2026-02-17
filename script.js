@@ -121,8 +121,10 @@ class DailyDataTable {
         this.addRowBtn = document.getElementById(`addRowBtn${suffix}`);
         this.exportCsvBtn = document.getElementById(`exportCsvBtn${suffix}`);
         this.periodFilter = document.getElementById(`periodFilter-${this.appId}`);
+        this.loadMoreBtn = document.getElementById(`loadMore${suffix}`);
         this.currentCountry = 'BR';
         this.selectedPeriod = 'all';
+        this.visibleRows = 5; // 🎨 Paginação: mostrar 5 linhas por padrão
         
         this.columns = [
             { key: 'date', label: 'Data', type: 'date' },
@@ -147,13 +149,23 @@ class DailyDataTable {
         this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
         this.periodFilter.addEventListener('change', () => {
             this.selectedPeriod = this.periodFilter.value;
+            this.visibleRows = 5; // 🎨 Resetar paginação ao trocar período
             this.updateMetrics();
         });
+        
+        // 🎨 Event listener do botão "Carregar mais"
+        if (this.loadMoreBtn) {
+            const btn = this.loadMoreBtn.querySelector('.load-more-btn');
+            if (btn) {
+                btn.addEventListener('click', () => this.loadMore());
+            }
+        }
     }
     
     switchCountry(country) {
         this.currentCountry = country;
         this.selectedPeriod = 'all';
+        this.visibleRows = 5; // 🎨 Resetar paginação ao trocar país
         this.loadData();
         this.populatePeriodFilter();
         this.updateMetrics();
@@ -204,6 +216,7 @@ class DailyDataTable {
         
         if (data.length === 0) {
             this.showEmptyState();
+            this.updateLoadMoreButton(0); // 🎨 Esconder botão se não há dados
         } else {
             // Sort data by date descending (most recent first)
             const sortedData = [...data].sort((a, b) => {
@@ -212,7 +225,12 @@ class DailyDataTable {
                 return dateB.localeCompare(dateA);
             });
             
-            sortedData.forEach((row, index) => this.renderRow(row, index));
+            // 🎨 Renderizar apenas as linhas visíveis
+            const rowsToShow = sortedData.slice(0, this.visibleRows);
+            rowsToShow.forEach((row, index) => this.renderRow(row, index));
+            
+            // 🎨 Atualizar botão "Carregar mais"
+            this.updateLoadMoreButton(sortedData.length);
         }
         
         this.populatePeriodFilter();
@@ -231,6 +249,37 @@ class DailyDataTable {
                 </td>
             </tr>
         `;
+    }
+    
+    // 🎨 Atualizar botão "Carregar mais"
+    updateLoadMoreButton(totalRows) {
+        if (!this.loadMoreBtn) return;
+        
+        if (totalRows > this.visibleRows) {
+            this.loadMoreBtn.style.display = 'block';
+            const remaining = totalRows - this.visibleRows;
+            const btn = this.loadMoreBtn.querySelector('.load-more-btn');
+            if (btn) {
+                btn.textContent = `📄 Carregar mais (${remaining} restantes)...`;
+            }
+        } else {
+            this.loadMoreBtn.style.display = 'none';
+        }
+    }
+    
+    // 🎨 Carregar mais linhas
+    loadMore() {
+        this.visibleRows += 5;
+        this.loadData();
+        
+        // Scroll suave pro topo da tabela (não pular pra baixo)
+        const tableWrapper = this.tableBody.closest('.table-wrapper');
+        if (tableWrapper) {
+            const firstNewRow = this.tableBody.children[this.visibleRows - 5];
+            if (firstNewRow) {
+                firstNewRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
     }
     
     renderRow(rowData, index) {
@@ -320,6 +369,7 @@ class DailyDataTable {
         
         data.push(newRow);
         this.setData(data);
+        this.visibleRows = 5; // 🎨 Resetar paginação ao adicionar linha (mostrar do topo)
         this.loadData();
         this.populatePeriodFilter(); // Update dropdown with new months
         

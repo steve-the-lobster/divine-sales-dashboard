@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste de Formatação de Moeda</title>
+    <style>
+        body { font-family: system-ui; padding: 20px; }
+        table { border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f0f0f0; }
+        .pass { color: green; }
+        .fail { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Formatação de Moeda por País</h1>
+    
+    <h2>Regras:</h2>
+    <ul>
+        <li><strong>Brasil (BR):</strong> R$ 1.234,56 (vírgula decimal, ponto milhar)</li>
+        <li><strong>Outros (US, CA, GB, AU, GLOBAL):</strong> $1,234.56 (ponto decimal, vírgula milhar)</li>
+    </ul>
+    
+    <table id="results">
+        <thead>
+            <tr>
+                <th>País</th>
+                <th>Valor de Entrada</th>
+                <th>Esperado</th>
+                <th>Resultado</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <script>
+        // Copiar a função formatCurrency do script.js
+        function formatCurrency(value, countryCode) {
+            const numValue = parseFloat(value) || 0;
+            
+            if (countryCode === 'BR') {
+                // Brasil: R$ 1.234,56 (vírgula decimal, ponto milhar)
+                return 'R$ ' + numValue.toLocaleString('pt-BR', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+            } else {
+                // Outros países: $1,234.56 (ponto decimal, vírgula milhar)
+                return '$' + numValue.toLocaleString('en-US', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+            }
+        }
+        
+        // Testes
+        const tests = [
+            { country: 'BR', value: 1234.56, expected: 'R$ 1.234,56' },
+            { country: 'BR', value: 100, expected: 'R$ 100,00' },
+            { country: 'BR', value: 0, expected: 'R$ 0,00' },
+            { country: 'US', value: 1234.56, expected: '$1,234.56' },
+            { country: 'US', value: 100, expected: '$100.00' },
+            { country: 'US', value: 0, expected: '$0.00' },
+            { country: 'CA', value: 5678.90, expected: '$5,678.90' },
+            { country: 'GB', value: 9999.99, expected: '$9,999.99' },
+            { country: 'AU', value: 123.45, expected: '$123.45' },
+            { country: 'GLOBAL', value: 10000, expected: '$10,000.00' }
+        ];
+        
+        const tbody = document.querySelector('#results tbody');
+        
+        tests.forEach(test => {
+            const result = formatCurrency(test.value, test.country);
+            const pass = result === test.expected;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${test.country}</strong></td>
+                <td>${test.value}</td>
+                <td><code>${test.expected}</code></td>
+                <td><code>${result}</code></td>
+                <td class="${pass ? 'pass' : 'fail'}">${pass ? '✅ PASS' : '❌ FAIL'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        // Resultado final
+        const totalTests = tests.length;
+        const passedTests = tests.filter(t => formatCurrency(t.value, t.country) === t.expected).length;
+        
+        const summary = document.createElement('div');
+        summary.style.marginTop = '20px';
+        summary.style.padding = '15px';
+        summary.style.background = passedTests === totalTests ? '#d4edda' : '#f8d7da';
+        summary.style.border = `1px solid ${passedTests === totalTests ? '#c3e6cb' : '#f5c6cb'}`;
+        summary.style.borderRadius = '4px';
+        summary.innerHTML = `
+            <h3>${passedTests === totalTests ? '✅' : '❌'} Resultado: ${passedTests}/${totalTests} testes passaram</h3>
+        `;
+        document.body.appendChild(summary);
+    </script>
+</body>
+</html>
