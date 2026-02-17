@@ -5,11 +5,39 @@
 const COUNTRIES = {
     BR: { name: 'Brasil', flag: '🇧🇷', currency: 'R$' },
     US: { name: 'EUA', flag: '🇺🇸', currency: '$' },
-    CA: { name: 'Canadá', flag: '🇨🇦', currency: 'CAD$' },
-    GB: { name: 'Reino Unido', flag: '🇬🇧', currency: '£' },
-    AU: { name: 'Austrália', flag: '🇦🇺', currency: 'AUD$' },
-    GLOBAL: { name: 'Global', flag: '🌎', currency: 'USD$' }
+    CA: { name: 'Canadá', flag: '🇨🇦', currency: '$' },
+    GB: { name: 'Reino Unido', flag: '🇬🇧', currency: '$' },
+    AU: { name: 'Austrália', flag: '🇦🇺', currency: '$' },
+    GLOBAL: { name: 'Global', flag: '🌎', currency: '$' }
 };
+
+// ============================================
+// CURRENCY FORMATTING HELPER
+// ============================================
+
+/**
+ * Formata valor monetário baseado no país
+ * @param {number|string} value - Valor a ser formatado
+ * @param {string} countryCode - Código do país (BR, US, CA, GB, AU, GLOBAL)
+ * @returns {string} - Valor formatado com símbolo de moeda
+ */
+function formatCurrency(value, countryCode) {
+    const numValue = parseFloat(value) || 0;
+    
+    if (countryCode === 'BR') {
+        // Brasil: R$ 1.234,56 (vírgula decimal, ponto milhar)
+        return 'R$ ' + numValue.toLocaleString('pt-BR', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        });
+    } else {
+        // Outros países: $1,234.56 (ponto decimal, vírgula milhar)
+        return '$' + numValue.toLocaleString('en-US', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        });
+    }
+}
 
 let currentCountry = {
     divinetalk: 'BR',
@@ -98,12 +126,12 @@ class DailyDataTable {
         
         this.columns = [
             { key: 'date', label: 'Data', type: 'date' },
-            { key: 'valorGasto', label: 'Valor Gasto', type: 'currency', prefix: 'R$' },
+            { key: 'valorGasto', label: 'Valor Gasto', type: 'currency' },
             { key: 'instalacoes', label: 'Instalações', type: 'number' },
             { key: 'trials', label: 'Trials', type: 'number' },
             { key: 'novosAssinantes', label: 'Novos Assinantes', type: 'number' },
-            { key: 'faturamentoApple', label: 'Faturamento Apple', type: 'currency', prefix: '$' },
-            { key: 'faturamentoAndroid', label: 'Faturamento Android', type: 'currency', prefix: 'R$' }
+            { key: 'faturamentoApple', label: 'Faturamento Apple', type: 'currency' },
+            { key: 'faturamentoAndroid', label: 'Faturamento Android', type: 'currency' }
         ];
         
         this.init();
@@ -212,6 +240,12 @@ class DailyDataTable {
         this.columns.forEach(col => {
             const td = document.createElement('td');
             const input = this.createInput(col, rowData[col.key], index);
+            
+            // Aplicar formatação inicial para campos monetários/numéricos
+            if ((col.type === 'currency' || col.type === 'number' || col.type === 'percentage') && input.value) {
+                this.formatValue(input, col);
+            }
+            
             td.appendChild(input);
             tr.appendChild(td);
         });
@@ -261,7 +295,8 @@ class DailyDataTable {
         if (isNaN(num)) return;
         
         if (col.type === 'currency') {
-            input.value = `${col.prefix} ${num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            // Usar formatCurrency com o país atual
+            input.value = formatCurrency(num, this.currentCountry);
         } else if (col.type === 'percentage') {
             input.value = `${num.toFixed(2)}%`;
         } else if (col.type === 'number') {
@@ -270,6 +305,7 @@ class DailyDataTable {
     }
     
     unformatValue(input, col) {
+        // Remover formatação ao focar (deixar só números)
         const value = input.value.replace(/[^\d.-]/g, '');
         input.value = value;
     }
@@ -355,24 +391,21 @@ class DailyDataTable {
         const custoPorTrial = totalTrials > 0 ? (totalValorGasto / totalTrials) : 0;
         const lucroBruto = totalFaturamento - totalValorGasto;
         
-        // Get currency symbol based on country
-        const currencySymbol = COUNTRIES[this.currentCountry].currency;
-        
         // Update metric cards (only 3 now: Faturamento, Custo por Trial, Lucro Bruto)
         const faturamentoEl = document.getElementById(`${this.appId}-faturamento`);
         const custoTrialEl = document.getElementById(`${this.appId}-custoTrial`);
         const lucroBrutoEl = document.getElementById(`${this.appId}-lucroBruto`);
         
         if (faturamentoEl) {
-            faturamentoEl.textContent = `${currencySymbol} ${totalFaturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            faturamentoEl.textContent = formatCurrency(totalFaturamento, this.currentCountry);
         }
         if (custoTrialEl) {
-            custoTrialEl.textContent = `${currencySymbol} ${custoPorTrial.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            custoTrialEl.textContent = formatCurrency(custoPorTrial, this.currentCountry);
         }
         if (lucroBrutoEl) {
             const isNegative = lucroBruto < 0;
-            const lucroText = `${currencySymbol} ${Math.abs(lucroBruto).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            lucroBrutoEl.textContent = isNegative ? `- ${lucroText}` : lucroText;
+            const formatted = formatCurrency(Math.abs(lucroBruto), this.currentCountry);
+            lucroBrutoEl.textContent = isNegative ? `- ${formatted}` : formatted;
             lucroBrutoEl.style.color = isNegative ? 'var(--danger)' : '';
         }
         
@@ -398,7 +431,7 @@ class DailyDataTable {
                 if (col.type === 'currency' && value) {
                     const num = parseFloat(value);
                     if (!isNaN(num)) {
-                        value = `"${col.prefix} ${num.toFixed(2)}"`;
+                        value = `"${formatCurrency(num, this.currentCountry)}"`;
                     }
                 } else if (col.type === 'percentage' && value) {
                     const num = parseFloat(value);
@@ -503,11 +536,12 @@ function updateOverviewMetrics() {
             const revenueCell = tbody.querySelector(`[data-country="${country}"][data-metric="revenue"]`);
             const conversionCell = tbody.querySelector(`[data-country="${country}"][data-metric="conversion"]`);
             
-            if (spentCell) spentCell.textContent = `R$ ${spent.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            // Usar formatCurrency baseado no país da linha
+            if (spentCell) spentCell.textContent = formatCurrency(spent, country);
             if (installsCell) installsCell.textContent = installs.toLocaleString('pt-BR');
             if (trialsCell) trialsCell.textContent = trials.toLocaleString('pt-BR');
             if (subscribersCell) subscribersCell.textContent = subscribers.toLocaleString('pt-BR');
-            if (revenueCell) revenueCell.textContent = `R$ ${revenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            if (revenueCell) revenueCell.textContent = formatCurrency(revenue, country);
             if (conversionCell) conversionCell.textContent = `${conversion.toFixed(2)}%`;
         });
     });
@@ -524,7 +558,8 @@ function updateOverviewMetrics() {
     const topRegionEl = document.getElementById('topRegion');
     
     if (globalTrialsEl) globalTrialsEl.textContent = globalTrials.toLocaleString('pt-BR');
-    if (globalRevenueEl) globalRevenueEl.textContent = `R$ ${globalRevenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    // Global revenue: usar formatCurrency com 'GLOBAL' (será $)
+    if (globalRevenueEl) globalRevenueEl.textContent = formatCurrency(globalRevenue, 'GLOBAL');
     if (globalConversionEl) globalConversionEl.textContent = globalConversionRate.toFixed(2);
     if (topRegionEl) topRegionEl.textContent = `${COUNTRIES[topRegion].flag} ${COUNTRIES[topRegion].name}`;
 }
