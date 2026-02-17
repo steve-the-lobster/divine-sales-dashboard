@@ -744,11 +744,11 @@ function updateCountryChart(countryMetrics, metric) {
                 label: label,
                 data: dataValues,
                 backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',   // BR - azul
-                    'rgba(16, 185, 129, 0.8)',   // US - verde
-                    'rgba(245, 158, 11, 0.8)',   // CA - laranja
-                    'rgba(139, 92, 246, 0.8)',   // GB - roxo
-                    'rgba(236, 72, 153, 0.8)'    // AU - rosa
+                    'rgba(59, 130, 246, 0.85)',   // BR - azul
+                    'rgba(16, 185, 129, 0.85)',   // US - verde
+                    'rgba(245, 158, 11, 0.85)',   // CA - laranja
+                    'rgba(139, 92, 246, 0.85)',   // GB - roxo
+                    'rgba(236, 72, 153, 0.85)'    // AU - rosa
                 ],
                 borderColor: [
                     'rgba(59, 130, 246, 1)',
@@ -758,7 +758,7 @@ function updateCountryChart(countryMetrics, metric) {
                     'rgba(236, 72, 153, 1)'
                 ],
                 borderWidth: 2,
-                borderRadius: 8,
+                borderRadius: 12,
                 hoverBackgroundColor: [
                     'rgba(59, 130, 246, 1)',
                     'rgba(16, 185, 129, 1)',
@@ -771,41 +771,87 @@ function updateCountryChart(countryMetrics, metric) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 800,
+                easing: 'easeInOutQuart'
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             plugins: {
                 legend: {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                    titleColor: '#f1f5f9',
+                    enabled: true,
+                    backgroundColor: 'rgba(10, 15, 30, 0.96)',
+                    titleColor: '#f8fafc',
                     bodyColor: '#cbd5e1',
-                    borderColor: '#3b82f6',
-                    borderWidth: 1,
-                    padding: 12,
-                    cornerRadius: 8,
+                    borderColor: 'rgba(59, 130, 246, 0.6)',
+                    borderWidth: 2,
+                    padding: 16,
+                    cornerRadius: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: '700',
+                        family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                    },
+                    bodyFont: {
+                        size: 13,
+                        weight: '600',
+                        family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                    },
+                    displayColors: true,
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
                     callbacks: {
+                        title: function(context) {
+                            return `${COUNTRIES[countries[context[0].dataIndex]].flag} ${context[0].label}`;
+                        },
                         label: function(context) {
                             let value = context.parsed.y;
                             if (isCurrency) {
-                                // Usar moeda do país (mas global usa $)
                                 const countryCode = countries[context.dataIndex];
-                                return `${label}: ${formatCurrency(value, countryCode)}`;
+                                return ` ${label}: ${formatCurrency(value, countryCode)}`;
                             } else {
-                                return `${label}: ${Math.round(value).toLocaleString('pt-BR')}`;
+                                return ` ${label}: ${Math.round(value).toLocaleString('pt-BR')}`;
                             }
                         }
                     }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
+                x: {
+                    grid: {
+                        display: false
+                    },
                     ticks: {
                         color: '#cbd5e1',
                         font: {
+                            size: 13,
+                            weight: '600',
+                            family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(51, 65, 85, 0.25)',
+                        lineWidth: 1,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#94a3b8',
+                        font: {
                             size: 12,
-                            weight: '600'
+                            weight: '600',
+                            family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
                         },
+                        padding: 8,
                         callback: function(value) {
                             if (isCurrency) {
                                 // Global format
