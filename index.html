@@ -44,28 +44,56 @@
 
                 <!-- Cards de Métricas Especiais -->
                 <div class="overview-special-cards">
-                    <!-- Card Orçamento -->
-                    <div class="overview-card budget-card">
-                        <h3>💰 Orçamento do Mês</h3>
-                        <div class="budget-details">
-                            <div class="budget-line">
-                                <span>Orçamento Total:</span>
-                                <div class="budget-input-wrapper">
-                                    <input type="number" id="budgetTotal" min="0" step="1000" placeholder="10000">
-                                </div>
+                    <!-- Card Orçamento DRE -->
+                    <div class="overview-card budget-card premium-card">
+                        <div class="card-header">
+                            <h3>💰 Orçamento do Mês</h3>
+                        </div>
+                        
+                        <div class="budget-total">
+                            <span class="label">Orçamento Total:</span>
+                            <input type="number" id="budgetTotal" value="20000" class="budget-input" min="0" step="1000">
+                        </div>
+                        
+                        <div class="budget-breakdown">
+                            <h4>DESPESAS:</h4>
+                            <div class="expense-line">
+                                <span class="expense-icon">🏢</span>
+                                <span class="expense-label">Custos Fixos</span>
+                                <span class="expense-value" id="expenseCustosFixos">R$ 0,00</span>
                             </div>
-                            <div class="budget-line">
-                                <span>Gasto até agora:</span>
-                                <span id="budgetSpent" class="budget-value">R$ 0,00</span>
+                            <div class="expense-line">
+                                <span class="expense-icon">📊</span>
+                                <span class="expense-label">Custos Variáveis</span>
+                                <span class="expense-value" id="expenseCustosVariaveis">R$ 0,00</span>
                             </div>
-                            <div class="budget-line">
-                                <span>Restante:</span>
-                                <span id="budgetRemaining" class="budget-value">R$ 0,00</span>
+                            <div class="expense-line">
+                                <span class="expense-icon">💳</span>
+                                <span class="expense-label">Extrato Cartão</span>
+                                <span class="expense-value" id="expenseExtratoCartao">R$ 0,00</span>
                             </div>
-                            <div class="budget-progress-container">
-                                <div class="budget-progress-bar" id="budgetProgressBar"></div>
-                                <span class="budget-percentage" id="budgetPercentage">0%</span>
+                            <div class="expense-line">
+                                <span class="expense-icon">📋</span>
+                                <span class="expense-label">Contas a Pagar (pendentes)</span>
+                                <span class="expense-value" id="expenseContasPagar">R$ 0,00</span>
                             </div>
+                            
+                            <div class="expense-divider"></div>
+                            
+                            <div class="expense-total">
+                                <span class="label">Total Gasto:</span>
+                                <span class="value" id="totalGasto">R$ 0,00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="budget-remaining">
+                            <span class="label">Orçamento Restante:</span>
+                            <span class="value" id="budgetRemaining">R$ 0,00</span>
+                        </div>
+                        
+                        <div class="budget-progress">
+                            <div class="progress-bar" id="budgetProgressBar"></div>
+                            <span class="progress-label" id="budgetProgressLabel">0%</span>
                         </div>
                     </div>
                     

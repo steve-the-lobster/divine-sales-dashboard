@@ -638,51 +638,90 @@ function calculateOverviewMetrics(period) {
     };
 }
 
-// Update budget card
-function updateBudgetCard(period, totalSpent) {
+// Update budget DRE card
+function updateBudgetDRE(month) {
     const budgetTotalInput = document.getElementById('budgetTotal');
-    const budgetSpentEl = document.getElementById('budgetSpent');
+    const expenseCustosFixosEl = document.getElementById('expenseCustosFixos');
+    const expenseCustosVariaveisEl = document.getElementById('expenseCustosVariaveis');
+    const expenseExtratoCartaoEl = document.getElementById('expenseExtratoCartao');
+    const expenseContasPagarEl = document.getElementById('expenseContasPagar');
+    const totalGastoEl = document.getElementById('totalGasto');
     const budgetRemainingEl = document.getElementById('budgetRemaining');
     const budgetProgressBar = document.getElementById('budgetProgressBar');
-    const budgetPercentageEl = document.getElementById('budgetPercentage');
+    const budgetProgressLabel = document.getElementById('budgetProgressLabel');
     
     if (!budgetTotalInput) return;
     
     // Load or save budget from localStorage
-    const budgetKey = `budget_${period}`;
-    let budgetTotal = parseFloat(localStorage.getItem(budgetKey)) || 0;
+    const budgetKey = `budget_${month}`;
+    let budgetTotal = parseFloat(localStorage.getItem(budgetKey)) || 20000;
     
     if (budgetTotal === 0 && budgetTotalInput.value) {
-        budgetTotal = parseFloat(budgetTotalInput.value) || 0;
+        budgetTotal = parseFloat(budgetTotalInput.value) || 20000;
     }
     
-    budgetTotalInput.value = budgetTotal || '';
+    budgetTotalInput.value = budgetTotal || 20000;
     
     // Save budget when changed
-    budgetTotalInput.addEventListener('input', () => {
+    budgetTotalInput.removeEventListener('input', handleBudgetInput); // Remove listener anterior
+    budgetTotalInput.addEventListener('input', handleBudgetInput);
+    
+    function handleBudgetInput() {
         const newBudget = parseFloat(budgetTotalInput.value) || 0;
         localStorage.setItem(budgetKey, newBudget.toString());
-        updateBudgetCard(period, totalSpent); // Recalculate
-    });
-    
-    const remaining = budgetTotal - totalSpent;
-    const percentage = budgetTotal > 0 ? (totalSpent / budgetTotal * 100) : 0;
-    
-    // Determine progress bar color
-    let progressColor = 'var(--success)';
-    if (percentage >= 95) {
-        progressColor = 'var(--danger)';
-    } else if (percentage >= 80) {
-        progressColor = 'var(--divine-gold)';
+        updateBudgetDRE(month); // Recalculate
     }
     
-    budgetSpentEl.textContent = formatCurrency(totalSpent, 'BR');
-    budgetRemainingEl.textContent = formatCurrency(Math.max(0, remaining), 'BR');
-    budgetRemainingEl.style.color = remaining < 0 ? 'var(--danger)' : 'var(--divine-blue)';
+    // Buscar dados da aba Financeiro
+    const custosFixos = JSON.parse(localStorage.getItem(`financial_custosFixos_${month}`) || '[]');
+    const custosVariaveis = JSON.parse(localStorage.getItem(`financial_custosVariaveis_${month}`) || '[]');
+    const extratoCartao = JSON.parse(localStorage.getItem(`financial_extratoCartao_${month}`) || '[]');
+    const contasPagar = JSON.parse(localStorage.getItem(`financial_contasPagar_${month}`) || '[]');
     
-    budgetProgressBar.style.setProperty('--progress-width', `${Math.min(percentage, 100)}%`);
-    budgetProgressBar.style.setProperty('--progress-color', progressColor);
-    budgetPercentageEl.textContent = `${percentage.toFixed(1)}%`;
+    // Calcular totais
+    const totalCustosFixos = custosFixos.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+    const totalCustosVariaveis = custosVariaveis.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+    const totalExtratoCartao = extratoCartao.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+    const totalContasPagar = contasPagar
+        .filter(item => item.status === 'pendente')
+        .reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+    
+    const totalGasto = totalCustosFixos + totalCustosVariaveis + totalExtratoCartao + totalContasPagar;
+    const restante = budgetTotal - totalGasto;
+    const percentGasto = budgetTotal > 0 ? (totalGasto / budgetTotal) * 100 : 0;
+    
+    // Atualizar DOM
+    if (expenseCustosFixosEl) expenseCustosFixosEl.textContent = formatCurrency(totalCustosFixos, 'BR');
+    if (expenseCustosVariaveisEl) expenseCustosVariaveisEl.textContent = formatCurrency(totalCustosVariaveis, 'BR');
+    if (expenseExtratoCartaoEl) expenseExtratoCartaoEl.textContent = formatCurrency(totalExtratoCartao, 'BR');
+    if (expenseContasPagarEl) expenseContasPagarEl.textContent = formatCurrency(totalContasPagar, 'BR');
+    if (totalGastoEl) totalGastoEl.textContent = formatCurrency(totalGasto, 'BR');
+    if (budgetRemainingEl) budgetRemainingEl.textContent = formatCurrency(restante, 'BR');
+    
+    // Atualizar barra de progresso
+    if (budgetProgressBar) {
+        budgetProgressBar.style.width = `${Math.min(percentGasto, 100)}%`;
+        
+        // Cores da barra (verde < 80%, amarelo 80-95%, vermelho > 95%)
+        if (percentGasto < 80) {
+            budgetProgressBar.style.backgroundColor = 'var(--success)';
+        } else if (percentGasto < 95) {
+            budgetProgressBar.style.backgroundColor = 'var(--warning)';
+        } else {
+            budgetProgressBar.style.backgroundColor = 'var(--danger)';
+        }
+    }
+    
+    if (budgetProgressLabel) {
+        budgetProgressLabel.textContent = `${percentGasto.toFixed(1)}%`;
+    }
+}
+
+// Legacy function - redirect to new DRE version
+function updateBudgetCard(period, totalSpent) {
+    // This is kept for backward compatibility
+    // New code should use updateBudgetDRE(month)
+    updateBudgetDRE(period);
 }
 
 // Update tax card
@@ -987,7 +1026,7 @@ function updateOverviewMetrics() {
     
     // Update new overview features (budget, tax, chart) with filtered period
     const metrics = calculateOverviewMetrics(overviewSelectedPeriod);
-    updateBudgetCard(overviewSelectedPeriod, metrics.totalSpent);
+    updateBudgetDRE(overviewSelectedPeriod); // Updated to DRE version
     updateTaxCard(metrics.totalRevenue);
     updateCountryChart(metrics.countryMetrics, currentChartMetric);
 }
@@ -1317,6 +1356,9 @@ class FinancialManager {
         document.getElementById('totalCustosFixos').textContent = formatCurrency(totalFixos, 'BR');
         document.getElementById('totalCustosVariaveis').textContent = formatCurrency(totalVariaveis, 'BR');
         document.getElementById('totalExtratoCartao').textContent = formatCurrency(totalCartao, 'BR');
+        
+        // Update Budget DRE in Overview
+        updateBudgetDRE(this.currentMonth);
     }
 
     attachEventListeners() {
