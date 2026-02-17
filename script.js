@@ -177,7 +177,14 @@ class DailyDataTable {
         if (data.length === 0) {
             this.showEmptyState();
         } else {
-            data.forEach((row, index) => this.renderRow(row, index));
+            // Sort data by date descending (most recent first)
+            const sortedData = [...data].sort((a, b) => {
+                const dateA = a.date || '';
+                const dateB = b.date || '';
+                return dateB.localeCompare(dateA);
+            });
+            
+            sortedData.forEach((row, index) => this.renderRow(row, index));
         }
         
         this.populatePeriodFilter();
@@ -237,6 +244,9 @@ class DailyDataTable {
         
         input.addEventListener('input', () => {
             this.saveData();
+            if (input.dataset.column === 'date') {
+                this.populatePeriodFilter(); // Update dropdown when date changes
+            }
             this.updateMetrics();
         });
         
@@ -275,10 +285,11 @@ class DailyDataTable {
         data.push(newRow);
         this.setData(data);
         this.loadData();
+        this.populatePeriodFilter(); // Update dropdown with new months
         
         setTimeout(() => {
-            this.tableBody.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            this.tableBody.lastElementChild.querySelector('input').focus();
+            this.tableBody.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            this.tableBody.firstElementChild.querySelector('input').focus();
         }, 100);
     }
     
@@ -289,6 +300,7 @@ class DailyDataTable {
         data.splice(index, 1);
         this.setData(data);
         this.loadData();
+        this.populatePeriodFilter(); // Update dropdown after deletion
     }
     
     saveData() {
