@@ -103,48 +103,6 @@
                     </div>
                 </div>
 
-                <!-- Tabela de Dados Diários -->
-                <div class="daily-data-section">
-                    <div class="section-header">
-                        <h2>📊 Dados Diários Detalhados</h2>
-                        <div class="section-actions">
-                            <button id="addRowBtn" class="action-btn add-btn">
-                                ➕ Adicionar Linha
-                            </button>
-                            <button id="exportCsvBtn" class="action-btn export-btn">
-                                💾 Export CSV
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="dailyDataTable" class="editable-table">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Valor Gasto</th>
-                                    <th>Imposto</th>
-                                    <th>Instalações</th>
-                                    <th>CPI Real</th>
-                                    <th>Trials</th>
-                                    <th>CPT</th>
-                                    <th>Novos Assinantes</th>
-                                    <th>Faturamento Apple</th>
-                                    <th>Faturamento Android</th>
-                                    <th>Lucro Bruto</th>
-                                    <th>Lucro Líquido</th>
-                                    <th>CPA</th>
-                                    <th>Margem de Lucro</th>
-                                    <th>Ticket Médio</th>
-                                    <th>Receita/Install</th>
-                                    <th class="actions-col">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <!-- Rows will be injected here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
 
             <!-- Divine Talk View -->
@@ -200,6 +158,49 @@
                             <p class="region-value">— trials</p>
                             <p class="region-revenue">$ —</p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Dados Diários - Divine Talk -->
+                <div class="daily-data-section">
+                    <div class="section-header">
+                        <h2>📊 Dados Diários - Divine Talk</h2>
+                        <div class="section-actions">
+                            <button id="addRowBtnDivineTalk" class="action-btn add-btn">
+                                ➕ Adicionar Linha
+                            </button>
+                            <button id="exportCsvBtnDivineTalk" class="action-btn export-btn">
+                                💾 Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="dailyDataTableDivineTalk" class="editable-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Valor Gasto</th>
+                                    <th>Imposto</th>
+                                    <th>Instalações</th>
+                                    <th>CPI Real</th>
+                                    <th>Trials</th>
+                                    <th>CPT</th>
+                                    <th>Novos Assinantes</th>
+                                    <th>Faturamento Apple</th>
+                                    <th>Faturamento Android</th>
+                                    <th>Lucro Bruto</th>
+                                    <th>Lucro Líquido</th>
+                                    <th>CPA</th>
+                                    <th>Margem de Lucro</th>
+                                    <th>Ticket Médio</th>
+                                    <th>Receita/Install</th>
+                                    <th class="actions-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBodyDivineTalk">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -258,6 +259,93 @@
                             <p class="region-revenue">$ —</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Tabela de Dados Diários - Divine TV -->
+                <div class="daily-data-section">
+                    <div class="section-header">
+                        <h2>📊 Dados Diários - Divine TV</h2>
+                        <div class="section-actions">
+                            <button id="addRowBtnDivineTV" class="action-btn add-btn">
+                                ➕ Adicionar Linha
+                            </button>
+                            <button id="exportCsvBtnDivineTV" class="action-btn export-btn">
+                                💾 Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="dailyDataTableDivineTV" class="editable-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Valor Gasto</th>
+                                    <th>Imposto</th>
+                                    <th>Instalações</th>
+                                    <th>CPI Real</th>
+                                    <th>Trials</th>
+                                    <th>CPT</th>
+                                    <th>Novos Assinantes</th>
+                                    <th>Faturamento Apple</th>
+                                    <th>Faturamento Android</th>
+                                    <th>Lucro Bruto</th>
+                                    <th>Lucro Líquido</th>
+                                    <th>CPA</th>
+                                    <th>Margem de Lucro</th>
+                                    <th>Ticket Médio</th>
+                                    <th>Receita/Install</th>
+                                    <th class="actions-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBodyDivineTV">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Data Table Section -->
+            <div class="daily-data-section">
+                <div class="section-header">
+                    <h2>📊 Dados Diários</h2>
+                    <div class="section-actions">
+                        <button id="addRowBtn" class="action-btn add-btn">
+                            ✨ Adicionar Linha
+                        </button>
+                        <button id="exportCsvBtn" class="action-btn export-btn">
+                            📥 Exportar CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="editable-table">
+                        <thead>
+                            <tr>
+                                <th>📅 Data</th>
+                                <th>💰 Valor Gasto</th>
+                                <th>🏛️ Imposto</th>
+                                <th>📲 Instalações</th>
+                                <th>💵 CPI Real</th>
+                                <th>🎯 Trials</th>
+                                <th>💸 CPT</th>
+                                <th>✅ Novos Assinantes</th>
+                                <th>🍎 Faturamento Apple</th>
+                                <th>🤖 Faturamento Android</th>
+                                <th>📈 Lucro Bruto</th>
+                                <th>💎 Lucro Líquido</th>
+                                <th>🎲 CPA</th>
+                                <th>📊 Margem de Lucro</th>
+                                <th>🎫 Ticket Médio</th>
+                                <th>🔥 Receita/Install</th>
+                                <th>⚙️ Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>

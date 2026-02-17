@@ -44,11 +44,13 @@ document.documentElement.style.scrollBehavior = 'smooth';
 // ============================================
 
 class DailyDataTable {
-    constructor() {
-        this.tableBody = document.getElementById('tableBody');
-        this.addRowBtn = document.getElementById('addRowBtn');
-        this.exportCsvBtn = document.getElementById('exportCsvBtn');
-        this.storageKey = 'divine_daily_data';
+    constructor(appName) {
+        this.appName = appName;
+        const suffix = appName === 'DivineTalk' ? 'DivineTalk' : 'DivineTV';
+        this.tableBody = document.getElementById(`tableBody${suffix}`);
+        this.addRowBtn = document.getElementById(`addRowBtn${suffix}`);
+        this.exportCsvBtn = document.getElementById(`exportCsvBtn${suffix}`);
+        this.storageKey = `${appName.toLowerCase()}_data`;
         
         this.columns = [
             { key: 'date', label: 'Data', type: 'date' },
@@ -281,7 +283,7 @@ class DailyDataTable {
         const timestamp = new Date().toISOString().split('T')[0];
         
         link.setAttribute('href', url);
-        link.setAttribute('download', `divine-daily-data-${timestamp}.csv`);
+        link.setAttribute('download', `${this.appName.toLowerCase()}-daily-data-${timestamp}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -291,8 +293,11 @@ class DailyDataTable {
     }
 }
 
-// Initialize the table when DOM is ready
+// Initialize the tables when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    const dailyTable = new DailyDataTable();
-    console.log('📊 Daily Data Table initialized!');
+    const divineTalkTable = new DailyDataTable('DivineTalk');
+    const divineTVTable = new DailyDataTable('DivineTV');
+    console.log('📊 Daily Data Tables initialized!');
+    console.log('💬 Divine Talk table ready');
+    console.log('📺 Divine TV table ready');
 });

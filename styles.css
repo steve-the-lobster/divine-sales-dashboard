@@ -5,15 +5,52 @@
 }
 
 :root {
+    /* Divine Brand Colors */
     --divine-blue: #3b82f6;
     --divine-gold: #f59e0b;
     --divine-white: #ffffff;
+    
+    /* Background Palette */
     --bg-primary: #0f172a;
     --bg-secondary: #1e293b;
     --bg-card: #334155;
+    
+    /* Text Colors */
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    
+    /* UI Colors */
     --border-color: #475569;
+    --border-hover: #64748b;
+    --success: #10b981;
+    --danger: #ef4444;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-blue: 0 8px 25px rgba(59, 130, 246, 0.3);
+    --shadow-gold: 0 8px 25px rgba(245, 158, 11, 0.3);
+    
+    /* Spacing Scale */
+    --space-xs: 8px;
+    --space-sm: 12px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
