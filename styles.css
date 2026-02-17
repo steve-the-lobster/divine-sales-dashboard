@@ -294,6 +294,187 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Daily Data Table Styles */
+.daily-data-section {
+    margin-top: 40px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    color: var(--divine-white);
+    margin: 0;
+}
+
+.section-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-color: #10b981;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.export-btn {
+    background: linear-gradient(135deg, var(--divine-gold) 0%, #d97706 100%);
+    color: white;
+    border-color: var(--divine-gold);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    background: var(--bg-card);
+}
+
+.editable-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    min-width: 1600px;
+}
+
+.editable-table thead {
+    background: linear-gradient(135deg, var(--divine-blue) 0%, #2563eb 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.editable-table th {
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--divine-white);
+    border-bottom: 2px solid var(--divine-blue);
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.editable-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.editable-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.editable-table td {
+    padding: 12px;
+    color: var(--text-primary);
+    border-right: 1px solid var(--border-color);
+}
+
+.editable-table td:last-child {
+    border-right: none;
+}
+
+.editable-table input {
+    width: 100%;
+    background: transparent;
+    border: 2px solid transparent;
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.editable-table input:focus {
+    outline: none;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--divine-blue);
+}
+
+.editable-table input[type="date"] {
+    cursor: pointer;
+}
+
+.editable-table input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.actions-col {
+    text-align: center;
+    width: 100px;
+}
+
+.delete-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.currency-input {
+    text-align: right;
+}
+
+.number-input {
+    text-align: right;
+}
+
+/* Empty state */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.empty-state p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
 @media (max-width: 768px) {
     header h1 {
         font-size: 2rem;
@@ -321,5 +502,22 @@ footer {
     .comparison-grid,
     .region-grid {
         grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .section-actions {
+        width: 100%;
+    }
+
+    .action-btn {
+        flex: 1;
+    }
+
+    .daily-data-section {
+        padding: 20px 15px;
     }
 }
