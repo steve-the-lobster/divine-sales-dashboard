@@ -545,7 +545,7 @@ footer {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
-    min-width: 1600px;
+    min-width: 900px;
 }
 
 .editable-table thead {

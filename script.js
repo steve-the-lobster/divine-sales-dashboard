@@ -96,21 +96,12 @@ class DailyDataTable {
         
         this.columns = [
             { key: 'date', label: 'Data', type: 'date' },
-            { key: 'spent', label: 'Valor Gasto', type: 'currency', prefix: 'R$' },
-            { key: 'tax', label: 'Imposto', type: 'currency', prefix: 'R$' },
-            { key: 'installs', label: 'Instalações', type: 'number' },
-            { key: 'cpi', label: 'CPI Real', type: 'currency', prefix: 'R$' },
+            { key: 'valorGasto', label: 'Valor Gasto', type: 'currency', prefix: 'R$' },
+            { key: 'instalacoes', label: 'Instalações', type: 'number' },
             { key: 'trials', label: 'Trials', type: 'number' },
-            { key: 'cpt', label: 'CPT', type: 'currency', prefix: 'R$' },
-            { key: 'subscribers', label: 'Novos Assinantes', type: 'number' },
-            { key: 'revenueApple', label: 'Faturamento Apple', type: 'currency', prefix: '$' },
-            { key: 'revenueAndroid', label: 'Faturamento Android', type: 'currency', prefix: 'R$' },
-            { key: 'grossProfit', label: 'Lucro Bruto', type: 'currency', prefix: 'R$' },
-            { key: 'netProfit', label: 'Lucro Líquido', type: 'currency', prefix: 'R$' },
-            { key: 'cpa', label: 'CPA', type: 'currency', prefix: 'R$' },
-            { key: 'profitMargin', label: 'Margem de Lucro', type: 'percentage' },
-            { key: 'avgTicket', label: 'Ticket Médio', type: 'currency', prefix: 'R$' },
-            { key: 'revenuePerInstall', label: 'Receita/Install', type: 'currency', prefix: 'R$' }
+            { key: 'novosAssinantes', label: 'Novos Assinantes', type: 'number' },
+            { key: 'faturamentoApple', label: 'Faturamento Apple', type: 'currency', prefix: '$' },
+            { key: 'faturamentoAndroid', label: 'Faturamento Android', type: 'currency', prefix: 'R$' }
         ];
         
         this.init();
@@ -149,7 +140,7 @@ class DailyDataTable {
         const countryInfo = COUNTRIES[this.currentCountry];
         this.tableBody.innerHTML = `
             <tr>
-                <td colspan="17" class="empty-state">
+                <td colspan="8" class="empty-state">
                     <p>📊 Nenhum dado cadastrado para ${countryInfo.name} ${countryInfo.flag}</p>
                     <p style="font-size: 0.9rem; color: var(--text-secondary);">
                         Clique em "+ Adicionar Linha" para começar
@@ -293,10 +284,10 @@ class DailyDataTable {
         
         data.forEach(row => {
             totalTrials += parseFloat(row.trials) || 0;
-            totalSubscribers += parseFloat(row.subscribers) || 0;
+            totalSubscribers += parseFloat(row.novosAssinantes) || 0;
             
-            const revenueApple = parseFloat(row.revenueApple) || 0;
-            const revenueAndroid = parseFloat(row.revenueAndroid) || 0;
+            const revenueApple = parseFloat(row.faturamentoApple) || 0;
+            const revenueAndroid = parseFloat(row.faturamentoAndroid) || 0;
             totalRevenue += revenueApple + revenueAndroid;
         });
         
@@ -398,31 +389,27 @@ function updateOverviewMetrics() {
                 const tbody = document.getElementById(app === 'divinetalk' ? 'summaryDivineTalk' : 'summaryDivineTV');
                 const cells = tbody.querySelectorAll(`[data-country="${country}"]`);
                 cells.forEach(cell => {
-                    const metric = cell.dataset.metric;
-                    if (metric === 'trials' || metric === 'revenue' || metric === 'profit') {
-                        cell.textContent = '—';
-                    } else if (metric === 'conversion') {
-                        cell.textContent = '—';
-                    }
+                    cell.textContent = '—';
                 });
                 return;
             }
             
             const data = JSON.parse(stored);
+            let spent = 0;
+            let installs = 0;
             let trials = 0;
-            let revenue = 0;
-            let profit = 0;
             let subscribers = 0;
+            let revenue = 0;
             
             data.forEach(row => {
+                spent += parseFloat(row.valorGasto) || 0;
+                installs += parseFloat(row.instalacoes) || 0;
                 trials += parseFloat(row.trials) || 0;
-                subscribers += parseFloat(row.subscribers) || 0;
+                subscribers += parseFloat(row.novosAssinantes) || 0;
                 
-                const revApple = parseFloat(row.revenueApple) || 0;
-                const revAndroid = parseFloat(row.revenueAndroid) || 0;
+                const revApple = parseFloat(row.faturamentoApple) || 0;
+                const revAndroid = parseFloat(row.faturamentoAndroid) || 0;
                 revenue += revApple + revAndroid;
-                
-                profit += parseFloat(row.netProfit) || 0;
             });
             
             const conversion = trials > 0 ? (subscribers / trials * 100) : 0;
@@ -437,15 +424,19 @@ function updateOverviewMetrics() {
             
             // Update summary table
             const tbody = document.getElementById(app === 'divinetalk' ? 'summaryDivineTalk' : 'summaryDivineTV');
+            const spentCell = tbody.querySelector(`[data-country="${country}"][data-metric="spent"]`);
+            const installsCell = tbody.querySelector(`[data-country="${country}"][data-metric="installs"]`);
             const trialsCell = tbody.querySelector(`[data-country="${country}"][data-metric="trials"]`);
+            const subscribersCell = tbody.querySelector(`[data-country="${country}"][data-metric="subscribers"]`);
             const revenueCell = tbody.querySelector(`[data-country="${country}"][data-metric="revenue"]`);
             const conversionCell = tbody.querySelector(`[data-country="${country}"][data-metric="conversion"]`);
-            const profitCell = tbody.querySelector(`[data-country="${country}"][data-metric="profit"]`);
             
+            if (spentCell) spentCell.textContent = `R$ ${spent.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+            if (installsCell) installsCell.textContent = installs.toLocaleString('pt-BR');
             if (trialsCell) trialsCell.textContent = trials.toLocaleString('pt-BR');
+            if (subscribersCell) subscribersCell.textContent = subscribers.toLocaleString('pt-BR');
             if (revenueCell) revenueCell.textContent = `R$ ${revenue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
             if (conversionCell) conversionCell.textContent = `${conversion.toFixed(2)}%`;
-            if (profitCell) profitCell.textContent = `R$ ${profit.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
         });
     });
     
