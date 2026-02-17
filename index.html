@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Divine Sales Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
 <body>
     <div class="container">
@@ -28,6 +29,74 @@
         <main id="content">
             <!-- Overview View -->
             <div class="view active" id="view-overview">
+                <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--divine-gold);">📊 Visão Geral Multi-Regional</h2>
+                
+                <!-- Filtro de Período -->
+                <div class="period-filter">
+                    <label>📅 Período:</label>
+                    <select id="periodFilterOverview">
+                        <option value="all">Todo o período</option>
+                    </select>
+                </div>
+
+                <!-- Cards de Métricas Especiais -->
+                <div class="overview-special-cards">
+                    <!-- Card Orçamento -->
+                    <div class="overview-card budget-card">
+                        <h3>💰 Orçamento do Mês</h3>
+                        <div class="budget-details">
+                            <div class="budget-line">
+                                <span>Orçamento Total:</span>
+                                <div class="budget-input-wrapper">
+                                    <input type="number" id="budgetTotal" min="0" step="1000" placeholder="10000">
+                                </div>
+                            </div>
+                            <div class="budget-line">
+                                <span>Gasto até agora:</span>
+                                <span id="budgetSpent" class="budget-value">R$ 0,00</span>
+                            </div>
+                            <div class="budget-line">
+                                <span>Restante:</span>
+                                <span id="budgetRemaining" class="budget-value">R$ 0,00</span>
+                            </div>
+                            <div class="budget-progress-container">
+                                <div class="budget-progress-bar" id="budgetProgressBar"></div>
+                                <span class="budget-percentage" id="budgetPercentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Impostos -->
+                    <div class="overview-card tax-card">
+                        <h3>📊 Impostos (6%)</h3>
+                        <div class="tax-details">
+                            <div class="tax-line">
+                                <span>Faturamento Total:</span>
+                                <span id="taxRevenue" class="tax-value">R$ 0,00</span>
+                            </div>
+                            <div class="tax-line tax-highlight">
+                                <span>Impostos (6%):</span>
+                                <span id="taxAmount" class="tax-value tax-amount-value">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Comparação por País -->
+                <div class="chart-section">
+                    <h3>📈 Desempenho por País</h3>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-metric="revenue">💰 Faturamento</button>
+                        <button class="chart-btn" data-metric="trials">🚀 Trials</button>
+                        <button class="chart-btn" data-metric="cpt">📊 Custo/Trial</button>
+                        <button class="chart-btn" data-metric="profit">💵 Lucro Bruto</button>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="countryComparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Cards Globais Originais -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">🚀</div>

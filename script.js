@@ -521,6 +521,332 @@ class DailyDataTable {
 }
 
 // ============================================
+// OVERVIEW PERIOD FILTER & CHART
+// ============================================
+
+let overviewSelectedPeriod = 'all';
+let countryComparisonChart = null;
+let currentChartMetric = 'revenue';
+
+// Populate period dropdown for overview
+function populateOverviewPeriodFilter() {
+    const apps = ['divinetalk', 'divinetv'];
+    const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
+    const periods = new Set();
+    
+    apps.forEach(app => {
+        countries.forEach(country => {
+            const key = `${app}_${country}`;
+            const stored = localStorage.getItem(key);
+            if (!stored) return;
+            
+            const data = JSON.parse(stored);
+            data.forEach(row => {
+                if (row.date) {
+                    const yearMonth = row.date.substring(0, 7);
+                    periods.add(yearMonth);
+                }
+            });
+        });
+    });
+    
+    const sortedPeriods = Array.from(periods).sort().reverse();
+    const periodFilter = document.getElementById('periodFilterOverview');
+    
+    if (!periodFilter) return;
+    
+    periodFilter.innerHTML = '<option value="all">Todo o período</option>';
+    sortedPeriods.forEach(period => {
+        const [year, month] = period.split('-');
+        const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const monthName = monthNames[parseInt(month) - 1];
+        const option = document.createElement('option');
+        option.value = period;
+        option.textContent = `${monthName} ${year}`;
+        periodFilter.appendChild(option);
+    });
+    
+    periodFilter.value = overviewSelectedPeriod;
+}
+
+// Get filtered data for a country+app in selected period
+function getFilteredData(app, country, period) {
+    const key = `${app}_${country}`;
+    const stored = localStorage.getItem(key);
+    if (!stored) return [];
+    
+    const data = JSON.parse(stored);
+    if (period === 'all') return data;
+    
+    return data.filter(row => row.date && row.date.startsWith(period));
+}
+
+// Calculate aggregated metrics for all countries
+function calculateOverviewMetrics(period) {
+    const apps = ['divinetalk', 'divinetv'];
+    const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
+    
+    let totalSpent = 0;
+    let totalRevenue = 0;
+    let totalTrials = 0;
+    
+    const countryMetrics = {};
+    
+    countries.forEach(country => {
+        let countrySpent = 0;
+        let countryRevenue = 0;
+        let countryTrials = 0;
+        
+        apps.forEach(app => {
+            const data = getFilteredData(app, country, period);
+            
+            data.forEach(row => {
+                const spent = parseFloat(row.valorGasto) || 0;
+                const trials = parseFloat(row.trials) || 0;
+                const revApple = parseFloat(row.faturamentoApple) || 0;
+                const revAndroid = parseFloat(row.faturamentoAndroid) || 0;
+                const revenue = revApple + revAndroid;
+                
+                countrySpent += spent;
+                countryRevenue += revenue;
+                countryTrials += trials;
+                
+                totalSpent += spent;
+                totalRevenue += revenue;
+                totalTrials += trials;
+            });
+        });
+        
+        const cpt = countryTrials > 0 ? (countrySpent / countryTrials) : 0;
+        const profit = countryRevenue - countrySpent;
+        
+        countryMetrics[country] = {
+            spent: countrySpent,
+            revenue: countryRevenue,
+            trials: countryTrials,
+            cpt: cpt,
+            profit: profit
+        };
+    });
+    
+    return {
+        totalSpent,
+        totalRevenue,
+        totalTrials,
+        countryMetrics
+    };
+}
+
+// Update budget card
+function updateBudgetCard(period, totalSpent) {
+    const budgetTotalInput = document.getElementById('budgetTotal');
+    const budgetSpentEl = document.getElementById('budgetSpent');
+    const budgetRemainingEl = document.getElementById('budgetRemaining');
+    const budgetProgressBar = document.getElementById('budgetProgressBar');
+    const budgetPercentageEl = document.getElementById('budgetPercentage');
+    
+    if (!budgetTotalInput) return;
+    
+    // Load or save budget from localStorage
+    const budgetKey = `budget_${period}`;
+    let budgetTotal = parseFloat(localStorage.getItem(budgetKey)) || 0;
+    
+    if (budgetTotal === 0 && budgetTotalInput.value) {
+        budgetTotal = parseFloat(budgetTotalInput.value) || 0;
+    }
+    
+    budgetTotalInput.value = budgetTotal || '';
+    
+    // Save budget when changed
+    budgetTotalInput.addEventListener('input', () => {
+        const newBudget = parseFloat(budgetTotalInput.value) || 0;
+        localStorage.setItem(budgetKey, newBudget.toString());
+        updateBudgetCard(period, totalSpent); // Recalculate
+    });
+    
+    const remaining = budgetTotal - totalSpent;
+    const percentage = budgetTotal > 0 ? (totalSpent / budgetTotal * 100) : 0;
+    
+    // Determine progress bar color
+    let progressColor = 'var(--success)';
+    if (percentage >= 95) {
+        progressColor = 'var(--danger)';
+    } else if (percentage >= 80) {
+        progressColor = 'var(--divine-gold)';
+    }
+    
+    budgetSpentEl.textContent = formatCurrency(totalSpent, 'BR');
+    budgetRemainingEl.textContent = formatCurrency(Math.max(0, remaining), 'BR');
+    budgetRemainingEl.style.color = remaining < 0 ? 'var(--danger)' : 'var(--divine-blue)';
+    
+    budgetProgressBar.style.setProperty('--progress-width', `${Math.min(percentage, 100)}%`);
+    budgetProgressBar.style.setProperty('--progress-color', progressColor);
+    budgetPercentageEl.textContent = `${percentage.toFixed(1)}%`;
+}
+
+// Update tax card
+function updateTaxCard(totalRevenue) {
+    const taxRevenueEl = document.getElementById('taxRevenue');
+    const taxAmountEl = document.getElementById('taxAmount');
+    
+    if (!taxRevenueEl) return;
+    
+    const taxAmount = totalRevenue * 0.06;
+    
+    taxRevenueEl.textContent = formatCurrency(totalRevenue, 'BR');
+    taxAmountEl.textContent = formatCurrency(taxAmount, 'BR');
+}
+
+// Update country comparison chart
+function updateCountryChart(countryMetrics, metric) {
+    const canvas = document.getElementById('countryComparisonChart');
+    if (!canvas) return;
+    
+    const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
+    const labels = countries.map(code => COUNTRIES[code].name);
+    
+    let dataValues = [];
+    let label = '';
+    let isCurrency = true;
+    
+    switch (metric) {
+        case 'revenue':
+            dataValues = countries.map(code => countryMetrics[code].revenue);
+            label = 'Faturamento';
+            break;
+        case 'trials':
+            dataValues = countries.map(code => countryMetrics[code].trials);
+            label = 'Trials';
+            isCurrency = false;
+            break;
+        case 'cpt':
+            dataValues = countries.map(code => countryMetrics[code].cpt);
+            label = 'Custo por Trial';
+            break;
+        case 'profit':
+            dataValues = countries.map(code => countryMetrics[code].profit);
+            label = 'Lucro Bruto';
+            break;
+    }
+    
+    // Destroy previous chart if exists
+    if (countryComparisonChart) {
+        countryComparisonChart.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    countryComparisonChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label,
+                data: dataValues,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',   // BR - azul
+                    'rgba(16, 185, 129, 0.8)',   // US - verde
+                    'rgba(245, 158, 11, 0.8)',   // CA - laranja
+                    'rgba(139, 92, 246, 0.8)',   // GB - roxo
+                    'rgba(236, 72, 153, 0.8)'    // AU - rosa
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(236, 72, 153, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                hoverBackgroundColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(236, 72, 153, 1)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            let value = context.parsed.y;
+                            if (isCurrency) {
+                                // Usar moeda do país (mas global usa $)
+                                const countryCode = countries[context.dataIndex];
+                                return `${label}: ${formatCurrency(value, countryCode)}`;
+                            } else {
+                                return `${label}: ${Math.round(value).toLocaleString('pt-BR')}`;
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#cbd5e1',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        callback: function(value) {
+                            if (isCurrency) {
+                                // Global format
+                                if (value >= 1000000) {
+                                    return '$' + (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return '$' + (value / 1000).toFixed(0) + 'K';
+                                }
+                                return '$' + value.toFixed(0);
+                            } else {
+                                return value.toLocaleString('pt-BR');
+                            }
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(71, 85, 105, 0.3)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#cbd5e1',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+}
+
+// ============================================
 // OVERVIEW METRICS
 // ============================================
 
@@ -533,7 +859,7 @@ function updateOverviewMetrics() {
     let globalConversions = 0;
     let regionRevenues = {};
     
-    // Calculate metrics for summary tables
+    // Calculate metrics for summary tables (always show all data)
     apps.forEach(app => {
         countries.forEach(country => {
             const key = `${app}_${country}`;
@@ -612,6 +938,12 @@ function updateOverviewMetrics() {
     if (globalRevenueEl) globalRevenueEl.textContent = formatCurrency(globalRevenue, 'GLOBAL');
     if (globalConversionEl) globalConversionEl.textContent = globalConversionRate.toFixed(2);
     if (topRegionEl) topRegionEl.textContent = `${COUNTRIES[topRegion].flag} ${COUNTRIES[topRegion].name}`;
+    
+    // Update new overview features (budget, tax, chart) with filtered period
+    const metrics = calculateOverviewMetrics(overviewSelectedPeriod);
+    updateBudgetCard(overviewSelectedPeriod, metrics.totalSpent);
+    updateTaxCard(metrics.totalRevenue);
+    updateCountryChart(metrics.countryMetrics, currentChartMetric);
 }
 
 // ============================================
@@ -628,6 +960,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('📊 Tables initialized with multi-regional support');
     console.log('🌎 Countries:', Object.keys(COUNTRIES).join(', '));
+    
+    // Initialize Overview features
+    populateOverviewPeriodFilter();
+    
+    // Period filter event listener
+    const periodFilterOverview = document.getElementById('periodFilterOverview');
+    if (periodFilterOverview) {
+        periodFilterOverview.addEventListener('change', () => {
+            overviewSelectedPeriod = periodFilterOverview.value;
+            updateOverviewMetrics();
+        });
+    }
+    
+    // Chart metric toggle buttons
+    const chartButtons = document.querySelectorAll('.chart-btn');
+    chartButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            chartButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            currentChartMetric = btn.dataset.metric;
+            const metrics = calculateOverviewMetrics(overviewSelectedPeriod);
+            updateCountryChart(metrics.countryMetrics, currentChartMetric);
+        });
+    });
     
     updateOverviewMetrics();
 });

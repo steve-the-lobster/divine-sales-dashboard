@@ -1040,6 +1040,293 @@ footer {
     font-weight: 600;
 }
 
+/* Overview Special Cards */
+.overview-special-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.overview-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.overview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-blue), var(--shadow-lg);
+    border-color: var(--border-hover);
+}
+
+.overview-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-lg);
+    color: var(--divine-white);
+    font-weight: 700;
+}
+
+/* Budget Card */
+.budget-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.budget-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.budget-line span:first-child {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.budget-value {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--divine-blue);
+    font-variant-numeric: tabular-nums;
+}
+
+.budget-input-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.budget-input-wrapper::before {
+    content: 'R$';
+    position: absolute;
+    left: var(--space-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+#budgetTotal {
+    width: 180px;
+    padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) + 30px);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all var(--transition-fast);
+    text-align: right;
+}
+
+#budgetTotal:hover {
+    border-color: var(--divine-blue);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+#budgetTotal:focus {
+    outline: none;
+    border-color: var(--divine-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.budget-progress-container {
+    position: relative;
+    margin-top: var(--space-md);
+}
+
+.budget-progress-bar {
+    width: 100%;
+    height: 28px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.budget-progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--progress-width, 0%);
+    background: var(--progress-color, var(--success));
+    border-radius: var(--radius-md);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.budget-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--divine-white);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+/* Tax Card */
+.tax-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.tax-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.tax-line span:first-child {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.tax-value {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--divine-blue);
+    font-variant-numeric: tabular-nums;
+}
+
+.tax-highlight {
+    padding: var(--space-lg);
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.tax-amount-value {
+    color: var(--divine-gold);
+    font-size: 1.5rem;
+}
+
+/* Chart Section */
+.chart-section {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+    box-shadow: var(--shadow-md);
+}
+
+.chart-section h3 {
+    font-size: 1.75rem;
+    margin-bottom: var(--space-lg);
+    color: var(--divine-white);
+    font-weight: 700;
+}
+
+.chart-controls {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+}
+
+.chart-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: var(--space-md) var(--space-lg);
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-family: inherit;
+    box-shadow: var(--shadow-sm);
+}
+
+.chart-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--divine-blue);
+    box-shadow: var(--shadow-blue);
+}
+
+.chart-btn.active {
+    background: linear-gradient(135deg, var(--divine-blue) 0%, #2563eb 100%);
+    border-color: var(--divine-blue);
+    color: var(--divine-white);
+    box-shadow: var(--shadow-blue), var(--shadow-md);
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    height: 400px;
+    padding: var(--space-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments for new components */
+@media (max-width: 768px) {
+    .overview-special-cards {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .chart-controls {
+        flex-direction: column;
+    }
+
+    .chart-btn {
+        min-width: 100%;
+    }
+
+    .chart-canvas-wrapper {
+        height: 300px;
+    }
+
+    .budget-line,
+    .tax-line {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-xs);
+    }
+
+    .budget-value,
+    .tax-value {
+        align-self: flex-end;
+    }
+
+    #budgetTotal {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .overview-card {
+        padding: var(--space-lg);
+    }
+
+    .chart-canvas-wrapper {
+        height: 250px;
+        padding: var(--space-sm);
+    }
+}
+
 /* Print Styles */
 @media print {
     body {
