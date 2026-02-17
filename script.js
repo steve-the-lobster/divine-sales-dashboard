@@ -1391,3 +1391,253 @@ if (document.readyState === 'loading') {
     window.financialManager = new FinancialManager();
     console.log('💰 Financial Manager initialized');
 }
+
+// ============================================
+// CALCULADORA DE UNIT ECONOMICS
+// ============================================
+
+/**
+ * Formata número como moeda BRL
+ */
+function formatBRL(value) {
+    return 'R$ ' + value.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+/**
+ * Formata número inteiro com separador de milhar (pt-BR)
+ */
+function formatIntBR(value) {
+    return Math.round(value).toLocaleString('pt-BR');
+}
+
+/**
+ * Lê um input numérico pelo id, retornando 0 se vazio/inválido
+ */
+function readInput(id) {
+    const el = document.getElementById(id);
+    if (!el) return 0;
+    const val = parseFloat(el.value);
+    return isNaN(val) ? 0 : val;
+}
+
+/**
+ * Escreve texto em um elemento pelo id
+ */
+function setOutput(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+/**
+ * Função principal: lê todos os inputs e atualiza todos os outputs
+ */
+function calcularMetricas() {
+    // --- Valores dos planos ---
+    const planWeekly   = readInput('plan-weekly');
+    const planMonthly  = readInput('plan-monthly');
+    const planBiannual = readInput('plan-biannual');
+    const planAnnual   = readInput('plan-annual');
+
+    // --- Mix de planos (em %) ---
+    const mixWeekly   = readInput('mix-weekly');
+    const mixMonthly  = readInput('mix-monthly');
+    const mixBiannual = readInput('mix-biannual');
+    const mixAnnual   = readInput('mix-annual');
+
+    const mixTotal = mixWeekly + mixMonthly + mixBiannual + mixAnnual;
+
+    // Indicador de mix total
+    const mixTotalEl = document.getElementById('mix-total-value');
+    const mixContainer = mixTotalEl ? mixTotalEl.closest('.calc-mix-total') : null;
+    if (mixTotalEl) {
+        mixTotalEl.textContent = mixTotal.toFixed(0) + '%';
+    }
+    if (mixContainer) {
+        if (Math.round(mixTotal) === 100) {
+            mixContainer.classList.remove('invalid');
+        } else {
+            mixContainer.classList.add('invalid');
+        }
+    }
+
+    // --- Funil de conversão (em %) ---
+    const paywallPct    = readInput('funnel-paywall');
+    const trialPct      = readInput('funnel-trial');
+    const conversionPct = readInput('funnel-conversion');
+
+    const paywallRate    = paywallPct / 100;
+    const trialRate      = trialPct / 100;
+    const conversionRate = conversionPct / 100;
+
+    // --- LTV Médio (soma ponderada) ---
+    // Para cada plano: planValue × (mix/100)
+    // Divide pelo total do mix pra evitar distorção se não somar 100%
+    let ltv = 0;
+    if (mixTotal > 0) {
+        ltv = (planWeekly   * (mixWeekly   / mixTotal) +
+               planMonthly  * (mixMonthly  / mixTotal) +
+               planBiannual * (mixBiannual / mixTotal) +
+               planAnnual   * (mixAnnual   / mixTotal));
+    }
+
+    // --- CPA Máximo = LTV Médio ---
+    const cpaMax = ltv;
+
+    // --- CPT Máximo = LTV × conversionRate ---
+    const cptMax = conversionRate > 0 ? ltv * conversionRate : null;
+
+    // --- CPI Máximo = LTV × paywall × trial × conversion ---
+    const fullFunnel = paywallRate * trialRate * conversionRate;
+    const cpiMax = fullFunnel > 0 ? ltv * fullFunnel : null;
+
+    // --- Receita por 1.000 downloads ---
+    const rev1k = fullFunnel > 0 ? ltv * fullFunnel * 1000 : 0;
+
+    // --- Metas: downloads/dia ---
+    // Fórmula: meta_reais ÷ (LTV × fullFunnel) / 30 (pra mensal) ou /365 (anual)
+    const revenuePerDownload = ltv * fullFunnel; // receita por download
+
+    function downloadsPerDay(targetMonthly) {
+        if (revenuePerDownload <= 0) return null;
+        return (targetMonthly / 30) / revenuePerDownload;
+    }
+
+    const dlFor100k  = downloadsPerDay(100000);
+    const dlFor500k  = downloadsPerDay(500000);
+    const dlFor1m    = downloadsPerDay(1000000);
+    const dlFor1mYr  = revenuePerDownload > 0 ? (1000000 / 365) / revenuePerDownload : null;
+
+    // --- Margem líquida: 100% - 30% Apple/Google - 6% impostos = 64% ---
+    const marginPct = 64;
+
+    // --- Simulador de escala ---
+    const investment = readInput('sim-investment');
+
+    let simInstalls  = null;
+    let simTrials    = null;
+    let simPayers    = null;
+    let simRevenue   = null;
+    let simProfit    = null;
+    let simROI       = null;
+
+    if (cpiMax && cpiMax > 0 && investment > 0) {
+        simInstalls = investment / cpiMax;
+        simTrials   = simInstalls * paywallRate * trialRate;
+        simPayers   = simTrials * conversionRate;
+        simRevenue  = simPayers * ltv;
+        simProfit   = simRevenue - investment;
+        simROI      = investment > 0 ? (simProfit / investment) * 100 : null;
+    }
+
+    // ==================
+    // ATUALIZAR OUTPUTS
+    // ==================
+
+    // Cards principais
+    setOutput('out-ltv', formatBRL(ltv));
+    setOutput('out-cpi', cpiMax !== null ? formatBRL(cpiMax) : '—');
+    setOutput('out-cpt', cptMax !== null ? formatBRL(cptMax) : '—');
+    setOutput('out-cpa', formatBRL(cpaMax));
+
+    // Receita por 1k downloads
+    setOutput('out-rev1k', revenuePerDownload > 0 ? formatBRL(rev1k) : '—');
+
+    // Margem líquida (sempre 64%, mas mostramos baseado no LTV)
+    setOutput('out-margin', `${marginPct}%`);
+    setOutput('out-margin-desc', `De cada R$100 gerado, você fica com R$${marginPct}`);
+
+    // Tabela de metas
+    const effStr = revenuePerDownload > 0
+        ? (fullFunnel * 100).toFixed(2) + '%'
+        : '—';
+
+    setOutput('goal-100k',     dlFor100k  !== null ? formatIntBR(dlFor100k)  + ' downloads/dia' : '—');
+    setOutput('goal-100k-eff', effStr);
+    setOutput('goal-500k',     dlFor500k  !== null ? formatIntBR(dlFor500k)  + ' downloads/dia' : '—');
+    setOutput('goal-500k-eff', effStr);
+    setOutput('goal-1m',       dlFor1m    !== null ? formatIntBR(dlFor1m)    + ' downloads/dia' : '—');
+    setOutput('goal-1m-eff',   effStr);
+    setOutput('goal-1m-yr',    dlFor1mYr  !== null ? formatIntBR(dlFor1mYr) + ' downloads/dia' : '—');
+    setOutput('goal-1m-yr-eff', effStr);
+
+    // Simulador
+    setOutput('sim-installs', simInstalls !== null ? formatIntBR(simInstalls) : '—');
+    setOutput('sim-trials',   simTrials   !== null ? formatIntBR(simTrials)   : '—');
+    setOutput('sim-payers',   simPayers   !== null ? formatIntBR(simPayers)   : '—');
+    setOutput('sim-revenue',  simRevenue  !== null ? formatBRL(simRevenue)    : '—');
+
+    if (simProfit !== null) {
+        const profitEl = document.getElementById('sim-profit');
+        if (profitEl) {
+            profitEl.textContent = formatBRL(Math.abs(simProfit));
+            profitEl.style.color = simProfit >= 0
+                ? 'var(--success)'
+                : 'var(--danger)';
+            if (simProfit < 0) {
+                profitEl.textContent = '- ' + formatBRL(Math.abs(simProfit));
+            }
+        }
+    } else {
+        setOutput('sim-profit', '—');
+        const profitEl = document.getElementById('sim-profit');
+        if (profitEl) profitEl.style.color = '';
+    }
+
+    if (simROI !== null) {
+        const roiEl = document.getElementById('sim-roi');
+        if (roiEl) {
+            roiEl.textContent = simROI.toFixed(1) + '%';
+            roiEl.style.color = simROI >= 0
+                ? 'var(--success)'
+                : 'var(--danger)';
+        }
+    } else {
+        setOutput('sim-roi', '—');
+        const roiEl = document.getElementById('sim-roi');
+        if (roiEl) roiEl.style.color = '';
+    }
+}
+
+/**
+ * Inicializa a calculadora: atribui event listeners e faz o cálculo inicial
+ */
+function initCalculadora() {
+    const calcInputIds = [
+        'plan-weekly', 'plan-monthly', 'plan-biannual', 'plan-annual',
+        'mix-weekly', 'mix-monthly', 'mix-biannual', 'mix-annual',
+        'funnel-paywall', 'funnel-trial', 'funnel-conversion',
+        'sim-investment'
+    ];
+
+    calcInputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', calcularMetricas);
+        }
+    });
+
+    // Calcular na inicialização com os valores padrão
+    calcularMetricas();
+    console.log('🧮 Calculadora de Unit Economics inicializada');
+}
+
+// Inicializar calculadora quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalculadora);
+} else {
+    initCalculadora();
+}
+
+// Recalcular quando a aba calculadora for ativada (para garantir valores corretos)
+document.addEventListener('DOMContentLoaded', () => {
+    const calcBtn = document.querySelector('.view-btn[data-view="calculadora"]');
+    if (calcBtn) {
+        calcBtn.addEventListener('click', () => {
+            // Pequeno delay pra garantir que a view ficou visível
+            requestAnimationFrame(calcularMetricas);
+        });
+    }
+});

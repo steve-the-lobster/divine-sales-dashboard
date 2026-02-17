@@ -30,6 +30,9 @@
             <button class="view-btn" data-view="dashboards">
                 📊 Dashboards
             </button>
+            <button class="view-btn" data-view="calculadora">
+                🧮 Calculadora
+            </button>
         </nav>
 
         <main id="content">
@@ -759,6 +762,256 @@
                     
                 </div>
             </div>
+            <!-- Calculadora View -->
+            <div class="view" id="view-calculadora">
+                <h2 class="calc-page-title">🧮 Calculadora de Unit Economics</h2>
+                <p class="calc-page-subtitle">Configure seus planos e funil de conversão para descobrir seu LTV, CPI máximo e muito mais.</p>
+
+                <!-- INPUTS GRID -->
+                <div class="calc-inputs-grid">
+
+                    <!-- Seção: Valores dos Planos -->
+                    <div class="calc-section">
+                        <h3 class="calc-section-title">💰 Valores dos Planos</h3>
+                        <div class="calc-field-group">
+                            <div class="calc-field">
+                                <label for="plan-weekly">Semanal</label>
+                                <div class="calc-input-wrapper">
+                                    <span class="calc-prefix">R$</span>
+                                    <input type="number" id="plan-weekly" value="9.90" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="calc-field">
+                                <label for="plan-monthly">Mensal</label>
+                                <div class="calc-input-wrapper">
+                                    <span class="calc-prefix">R$</span>
+                                    <input type="number" id="plan-monthly" value="29.90" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="calc-field">
+                                <label for="plan-biannual">Semestral</label>
+                                <div class="calc-input-wrapper">
+                                    <span class="calc-prefix">R$</span>
+                                    <input type="number" id="plan-biannual" value="89.90" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="calc-field">
+                                <label for="plan-annual">Anual</label>
+                                <div class="calc-input-wrapper">
+                                    <span class="calc-prefix">R$</span>
+                                    <input type="number" id="plan-annual" value="119.90" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Mix de Planos -->
+                    <div class="calc-section">
+                        <h3 class="calc-section-title">📊 Mix de Planos <span class="calc-note">(soma deve = 100%)</span></h3>
+                        <div class="calc-field-group">
+                            <div class="calc-field">
+                                <label for="mix-weekly">% Semanal</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="mix-weekly" value="10" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                            </div>
+                            <div class="calc-field">
+                                <label for="mix-monthly">% Mensal</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="mix-monthly" value="50" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                            </div>
+                            <div class="calc-field">
+                                <label for="mix-biannual">% Semestral</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="mix-biannual" value="15" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                            </div>
+                            <div class="calc-field">
+                                <label for="mix-annual">% Anual</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="mix-annual" value="25" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="calc-mix-total">
+                            Total: <span id="mix-total-value">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Funil de Conversão -->
+                    <div class="calc-section calc-section-full">
+                        <h3 class="calc-section-title">🎯 Funil de Conversão</h3>
+                        <div class="calc-field-group calc-field-group-3">
+                            <div class="calc-field">
+                                <label for="funnel-paywall">Download → Paywall</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="funnel-paywall" value="60" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                                <span class="calc-hint">% dos downloads que chegam ao paywall</span>
+                            </div>
+                            <div class="calc-field">
+                                <label for="funnel-trial">Paywall → Trial</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="funnel-trial" value="40" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                                <span class="calc-hint">% que inicia trial após ver paywall</span>
+                            </div>
+                            <div class="calc-field">
+                                <label for="funnel-conversion">Trial → Pagante</label>
+                                <div class="calc-input-wrapper">
+                                    <input type="number" id="funnel-conversion" value="30" step="1" min="0" max="100" placeholder="0">
+                                    <span class="calc-suffix">%</span>
+                                </div>
+                                <span class="calc-hint">% que converte de trial para pago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /calc-inputs-grid -->
+
+                <!-- DIVIDER -->
+                <div class="calc-divider">
+                    <span>✨ Resultados em Tempo Real</span>
+                </div>
+
+                <!-- OUTPUTS: Cards Principais -->
+                <div class="calc-results-grid">
+                    <div class="calc-result-card">
+                        <div class="calc-result-label">LTV Médio</div>
+                        <div class="calc-result-value" id="out-ltv">R$ 0,00</div>
+                        <div class="calc-result-desc">Receita média por assinante</div>
+                    </div>
+                    <div class="calc-result-card">
+                        <div class="calc-result-label">CPI Máximo</div>
+                        <div class="calc-result-value" id="out-cpi">—</div>
+                        <div class="calc-result-desc">Custo por Install máximo pra ser lucrativo</div>
+                    </div>
+                    <div class="calc-result-card">
+                        <div class="calc-result-label">CPT Máximo</div>
+                        <div class="calc-result-value" id="out-cpt">—</div>
+                        <div class="calc-result-desc">Custo por Trial máximo</div>
+                    </div>
+                    <div class="calc-result-card">
+                        <div class="calc-result-label">CPA Máximo</div>
+                        <div class="calc-result-value" id="out-cpa">R$ 0,00</div>
+                        <div class="calc-result-desc">Custo por Assinante máximo</div>
+                    </div>
+                </div>
+
+                <!-- OUTPUTS: Métricas Adicionais -->
+                <div class="calc-metrics-row">
+                    <div class="calc-metric-card">
+                        <div class="calc-metric-icon">💸</div>
+                        <div class="calc-metric-content">
+                            <div class="calc-metric-label">Receita por 1.000 Downloads</div>
+                            <div class="calc-metric-value" id="out-rev1k">R$ 0,00</div>
+                        </div>
+                    </div>
+                    <div class="calc-metric-card">
+                        <div class="calc-metric-icon">🍎</div>
+                        <div class="calc-metric-content">
+                            <div class="calc-metric-label">Margem Líquida Estimada</div>
+                            <div class="calc-metric-value" id="out-margin">64%</div>
+                            <div class="calc-metric-sub" id="out-margin-desc">De cada R$100 gerado, você fica com R$64</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OUTPUTS: Tabela de Metas -->
+                <div class="calc-section calc-section-single">
+                    <h3 class="calc-section-title">🎯 Downloads Necessários por Meta</h3>
+                    <p class="calc-section-sub">Quantos downloads/dia você precisa para atingir cada meta de faturamento?</p>
+                    <div class="table-wrapper">
+                        <table class="calc-goals-table summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Meta de Receita</th>
+                                    <th>Downloads/dia necessários</th>
+                                    <th>Conversão efetiva</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>💰 R$100K/mês</td>
+                                    <td class="number-cell" id="goal-100k">—</td>
+                                    <td class="percent-cell" id="goal-100k-eff">—</td>
+                                </tr>
+                                <tr>
+                                    <td>💰 R$500K/mês</td>
+                                    <td class="number-cell" id="goal-500k">—</td>
+                                    <td class="percent-cell" id="goal-500k-eff">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🚀 R$1M/mês</td>
+                                    <td class="number-cell" id="goal-1m">—</td>
+                                    <td class="percent-cell" id="goal-1m-eff">—</td>
+                                </tr>
+                                <tr>
+                                    <td>🏆 R$1M/ano</td>
+                                    <td class="number-cell" id="goal-1m-yr">—</td>
+                                    <td class="percent-cell" id="goal-1m-yr-eff">—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SIMULADOR DE ESCALA -->
+                <div class="calc-section calc-section-single calc-simulator">
+                    <h3 class="calc-section-title">📈 Simulador de Escala</h3>
+                    <p class="calc-section-sub">Simule o retorno de um investimento em aquisição de usuários.</p>
+
+                    <div class="calc-sim-input-row">
+                        <label for="sim-investment">Investimento em Ads (R$)</label>
+                        <div class="calc-input-wrapper calc-input-wide">
+                            <span class="calc-prefix">R$</span>
+                            <input type="number" id="sim-investment" value="10000" step="100" min="0" placeholder="10000">
+                        </div>
+                    </div>
+
+                    <div class="calc-sim-results">
+                        <div class="calc-sim-card">
+                            <div class="calc-sim-icon">📲</div>
+                            <div class="calc-sim-label">Installs Estimados</div>
+                            <div class="calc-sim-value" id="sim-installs">—</div>
+                        </div>
+                        <div class="calc-sim-card">
+                            <div class="calc-sim-icon">🚀</div>
+                            <div class="calc-sim-label">Trials Estimados</div>
+                            <div class="calc-sim-value" id="sim-trials">—</div>
+                        </div>
+                        <div class="calc-sim-card">
+                            <div class="calc-sim-icon">✅</div>
+                            <div class="calc-sim-label">Pagantes Estimados</div>
+                            <div class="calc-sim-value" id="sim-payers">—</div>
+                        </div>
+                        <div class="calc-sim-card">
+                            <div class="calc-sim-icon">💰</div>
+                            <div class="calc-sim-label">Receita Estimada</div>
+                            <div class="calc-sim-value" id="sim-revenue">—</div>
+                        </div>
+                        <div class="calc-sim-card">
+                            <div class="calc-sim-icon">📊</div>
+                            <div class="calc-sim-label">Lucro Estimado</div>
+                            <div class="calc-sim-value" id="sim-profit">—</div>
+                        </div>
+                        <div class="calc-sim-card">
+                            <div class="calc-sim-icon">📈</div>
+                            <div class="calc-sim-label">ROI</div>
+                            <div class="calc-sim-value" id="sim-roi">—</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /view-calculadora -->
+
         </main>
 
         <footer>
