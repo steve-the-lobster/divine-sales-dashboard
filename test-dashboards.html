@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboards</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Test: Dashboard Analytics</h1>
+        </header>
+
+        <main id="content">
+            <div class="view active" id="view-dashboards">
+                <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--divine-gold);">📊 Dashboards - Análise Comparativa</h2>
+                
+                <!-- Filtro de Período -->
+                <div class="period-filter">
+                    <label>📅 Período:</label>
+                    <select id="periodFilterDashboards">
+                        <option value="all">Todo o período</option>
+                    </select>
+                </div>
+                
+                <!-- Grid de Gráficos -->
+                <div class="dashboards-grid">
+                    
+                    <!-- País vs País -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>🌎 País vs País</h3>
+                            <div class="chart-controls">
+                                <button class="metric-btn active" data-metric="revenue">Faturamento</button>
+                                <button class="metric-btn" data-metric="trials">Trials</button>
+                                <button class="metric-btn" data-metric="cpt">Custo/Trial</button>
+                                <button class="metric-btn" data-metric="profit">Lucro</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartCountryComparison"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- App vs App -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>📱 App vs App</h3>
+                            <div class="chart-controls">
+                                <button class="metric-btn active" data-metric="revenue">Faturamento</button>
+                                <button class="metric-btn" data-metric="trials">Trials</button>
+                                <button class="metric-btn" data-metric="installs">Instalações</button>
+                                <button class="metric-btn" data-metric="subscribers">Assinantes</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartAppComparison"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Evolução Mensal -->
+                    <div class="chart-container full-width">
+                        <div class="chart-header">
+                            <h3>📈 Evolução Mensal (Últimos 6 meses)</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartMonthlyTrend"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Distribuição de Receita -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>🥧 Receita por País</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartRevenueDistribution"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Despesas por Categoria -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>📊 Despesas por Categoria</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartExpenseBreakdown"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Conversão -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>📉 Taxa de Conversão</h3>
+                            <div class="chart-controls">
+                                <button class="metric-btn active" data-metric="country">Por País</button>
+                                <button class="metric-btn" data-metric="app">Por App</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartConversion"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- ROI por País -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>💰 ROI por País</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chartROI"></canvas>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="test-data-generator.js"></script>
+    <script src="test-financial-data.js"></script>
+    <script src="dashboard-analytics.js"></script>
+</body>
+</html>
