@@ -8,8 +8,13 @@ const COUNTRIES = {
     CA: { name: 'Canadá', flag: '🇨🇦', currency: '$' },
     GB: { name: 'Reino Unido', flag: '🇬🇧', currency: '$' },
     AU: { name: 'Austrália', flag: '🇦🇺', currency: '$' },
-    GLOBAL: { name: 'Global', flag: '🌎', currency: '$' }
+    GLOBAL: { name: 'Global', flag: '🌎', currency: '$' },
+    ALL: { name: 'Todos os Países', flag: '🌎', currency: 'R$' }
 };
+
+// Countries to aggregate when ALL is selected
+const ALL_COUNTRIES = ['BR', 'US', 'CA', 'GB', 'AU'];
+const FX_RATE = 5.4; // Taxa de conversão USD/CAD/GBP/AUD → R$
 
 // ============================================
 // CURRENCY FORMATTING HELPER
@@ -166,8 +171,23 @@ class DailyDataTable {
         this.currentCountry = country;
         this.selectedPeriod = 'all';
         this.visibleRows = 5; // 🎨 Resetar paginação ao trocar país
+        
+        // Disable/enable add row button for ALL mode
+        if (this.addRowBtn) {
+            this.addRowBtn.disabled = (country === 'ALL');
+            this.addRowBtn.style.opacity = (country === 'ALL') ? '0.4' : '';
+            this.addRowBtn.title = (country === 'ALL') ? 'Não é possível adicionar no modo Todos os Países' : '';
+        }
+        
+        // Update country label
+        const countryInfo = COUNTRIES[country] || COUNTRIES['BR'];
+        const label = document.getElementById(`${this.appId}-country-label`);
+        if (label) {
+            label.textContent = `${countryInfo.name} ${countryInfo.flag}`;
+        }
+        
         this.loadData();
-        this.populatePeriodFilter();
+        // populatePeriodFilter is called inside loadData (including ALL mode)
         this.updateMetrics();
     }
     
@@ -210,9 +230,62 @@ class DailyDataTable {
         return data.filter(row => row.date && row.date.startsWith(period));
     }
     
+    updateTableHeader(showCountryCol) {
+        // Find the thead of this table
+        const suffix = this.appName === 'DivineTalk' ? 'DivineTalk' : 'DivineTV';
+        const table = document.getElementById(`dailyDataTable${suffix}`);
+        if (!table) return;
+        const thead = table.querySelector('thead tr');
+        if (!thead) return;
+        
+        // Remove existing country header if present
+        const existingCountryTh = thead.querySelector('th.country-col');
+        if (existingCountryTh) existingCountryTh.remove();
+        
+        if (showCountryCol) {
+            const th = document.createElement('th');
+            th.textContent = 'País';
+            th.className = 'country-col';
+            thead.insertBefore(th, thead.firstChild);
+        }
+    }
+    
     loadData() {
-        const data = this.getData();
         this.tableBody.innerHTML = '';
+        
+        // ALL mode: aggregate from all countries (read-only)
+        if (this.currentCountry === 'ALL') {
+            this.updateTableHeader(true);
+            const allData = [];
+            ALL_COUNTRIES.forEach(country => {
+                const key = `${this.appId}_${country}`;
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    data.forEach(row => allData.push({ ...row, _country: country }));
+                }
+            });
+            
+            // Show all rows (period filter only affects metric cards, same as non-ALL mode)
+            const sorted = allData.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            
+            if (sorted.length === 0) {
+                this.tableBody.innerHTML = `<tr><td colspan="9" class="empty-state"><p>🌎 Nenhum dado cadastrado</p></td></tr>`;
+                this.updateLoadMoreButton(0);
+            } else {
+                const rowsToShow = sorted.slice(0, this.visibleRows);
+                rowsToShow.forEach(row => this.renderReadOnlyRow(row));
+                this.updateLoadMoreButton(sorted.length);
+            }
+            this.populatePeriodFilterAll(allData);
+            this.updateMetrics();
+            return;
+        }
+        
+        // Remove country column if switching back from ALL
+        this.updateTableHeader(false);
+        
+        const data = this.getData();
         
         if (data.length === 0) {
             this.showEmptyState();
@@ -235,6 +308,64 @@ class DailyDataTable {
         
         this.populatePeriodFilter();
         this.updateMetrics();
+    }
+    
+    // Render a read-only row for ALL mode (includes country column)
+    renderReadOnlyRow(rowData) {
+        const countryInfo = COUNTRIES[rowData._country] || { name: rowData._country, flag: '' };
+        const tr = document.createElement('tr');
+        
+        // Country cell
+        const tdCountry = document.createElement('td');
+        tdCountry.textContent = `${countryInfo.flag} ${countryInfo.name}`;
+        tdCountry.style.fontWeight = '600';
+        tr.appendChild(tdCountry);
+        
+        this.columns.forEach(col => {
+            const td = document.createElement('td');
+            let val = rowData[col.key] || '';
+            const num = parseFloat(val);
+            if (col.type === 'currency' && !isNaN(num)) {
+                // Convert non-BR to R$ equivalent for display
+                td.textContent = formatCurrency(num, rowData._country);
+            } else if (col.type === 'number' && !isNaN(num)) {
+                td.textContent = Math.round(num).toLocaleString('pt-BR');
+            } else if (col.type === 'date' && val) {
+                const parts = val.split('-');
+                td.textContent = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : val;
+            } else {
+                td.textContent = val || '—';
+            }
+            tr.appendChild(td);
+        });
+        
+        // Empty actions cell
+        const tdActions = document.createElement('td');
+        tdActions.className = 'actions-col';
+        tdActions.textContent = '—';
+        tr.appendChild(tdActions);
+        
+        this.tableBody.appendChild(tr);
+    }
+    
+    // Populate period filter for ALL mode
+    populatePeriodFilterAll(allData) {
+        const periods = new Set();
+        allData.forEach(row => {
+            if (row.date) periods.add(row.date.substring(0, 7));
+        });
+        const sortedPeriods = Array.from(periods).sort().reverse();
+        this.periodFilter.innerHTML = '<option value="all">Todo o período</option>';
+        sortedPeriods.forEach(period => {
+            const [year, month] = period.split('-');
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const option = document.createElement('option');
+            option.value = period;
+            option.textContent = `${monthNames[parseInt(month) - 1]} ${year}`;
+            this.periodFilter.appendChild(option);
+        });
+        this.periodFilter.value = this.selectedPeriod;
     }
     
     showEmptyState() {
@@ -422,8 +553,26 @@ class DailyDataTable {
     }
     
     updateMetrics() {
-        const allData = this.getData();
-        const data = this.filterDataByPeriod(allData, this.selectedPeriod);
+        let data;
+        let displayCountry = this.currentCountry;
+        
+        if (this.currentCountry === 'ALL') {
+            // Aggregate from all countries
+            const allRaw = [];
+            ALL_COUNTRIES.forEach(country => {
+                const key = `${this.appId}_${country}`;
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    const rows = JSON.parse(stored);
+                    rows.forEach(row => allRaw.push({ ...row, _country: country }));
+                }
+            });
+            data = this.filterDataByPeriod(allRaw, this.selectedPeriod);
+            displayCountry = 'BR'; // display in R$
+        } else {
+            const allData = this.getData();
+            data = this.filterDataByPeriod(allData, this.selectedPeriod);
+        }
         
         let totalTrials = 0;
         let totalValorGasto = 0;
@@ -432,31 +581,59 @@ class DailyDataTable {
         data.forEach(row => {
             totalTrials += parseFloat(row.trials) || 0;
             totalValorGasto += parseFloat(row.valorGasto) || 0;
-            
             const faturamentoApple = parseFloat(row.faturamentoApple) || 0;
             const faturamentoAndroid = parseFloat(row.faturamentoAndroid) || 0;
             totalFaturamento += faturamentoApple + faturamentoAndroid;
         });
         
         const custoPorTrial = totalTrials > 0 ? (totalValorGasto / totalTrials) : 0;
-        const lucroBruto = totalFaturamento - totalValorGasto;
         
-        // Update metric cards (only 3 now: Faturamento, Custo por Trial, Lucro Bruto)
+        // Para BR: usar valorGasto × 1.13 no cálculo do Lucro Bruto
+        let valorGastoParaLucro = totalValorGasto;
+        let valorGastoComImposto = 0;
+        const isBR = this.currentCountry === 'BR';
+        
+        if (isBR) {
+            valorGastoComImposto = totalValorGasto * 1.13;
+            valorGastoParaLucro = valorGastoComImposto;
+        }
+        
+        const lucroBruto = totalFaturamento - valorGastoParaLucro;
+        
+        // Update metric cards
         const faturamentoEl = document.getElementById(`${this.appId}-faturamento`);
         const custoTrialEl = document.getElementById(`${this.appId}-custoTrial`);
         const lucroBrutoEl = document.getElementById(`${this.appId}-lucroBruto`);
+        const valorGastoEl = document.getElementById(`${this.appId}-valorGasto`);
+        const impostoSection = document.getElementById(`${this.appId}-imposto-section`);
+        const valorGastoComImpostoEl = document.getElementById(`${this.appId}-valorGastoComImposto`);
         
         if (faturamentoEl) {
-            faturamentoEl.textContent = formatCurrency(totalFaturamento, this.currentCountry);
+            faturamentoEl.textContent = formatCurrency(totalFaturamento, displayCountry);
         }
         if (custoTrialEl) {
-            custoTrialEl.textContent = formatCurrency(custoPorTrial, this.currentCountry);
+            custoTrialEl.textContent = formatCurrency(custoPorTrial, displayCountry);
         }
         if (lucroBrutoEl) {
             const isNegative = lucroBruto < 0;
-            const formatted = formatCurrency(Math.abs(lucroBruto), this.currentCountry);
+            const formatted = formatCurrency(Math.abs(lucroBruto), displayCountry);
             lucroBrutoEl.textContent = isNegative ? `- ${formatted}` : formatted;
             lucroBrutoEl.style.color = isNegative ? 'var(--danger)' : '';
+        }
+        
+        // 4th card: Valor Gasto em Ads
+        if (valorGastoEl) {
+            valorGastoEl.textContent = formatCurrency(totalValorGasto, displayCountry);
+        }
+        if (impostoSection) {
+            if (isBR) {
+                impostoSection.style.display = 'block';
+                if (valorGastoComImpostoEl) {
+                    valorGastoComImpostoEl.textContent = formatCurrency(valorGastoComImposto, 'BR');
+                }
+            } else {
+                impostoSection.style.display = 'none';
+            }
         }
         
         // Update overview if needed
@@ -525,6 +702,8 @@ class DailyDataTable {
 // ============================================
 
 let overviewSelectedPeriod = 'all';
+let overviewAppFilter = 'all';
+let dashboardsAppFilter = 'all';
 let countryComparisonChart = null;
 let currentChartMetric = 'revenue';
 
@@ -583,8 +762,9 @@ function getFilteredData(app, country, period) {
 }
 
 // Calculate aggregated metrics for all countries
-function calculateOverviewMetrics(period) {
-    const apps = ['divinetalk', 'divinetv'];
+function calculateOverviewMetrics(period, appFilter) {
+    const allApps = ['divinetalk', 'divinetv'];
+    const apps = (appFilter && appFilter !== 'all') ? [appFilter] : allApps;
     const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
     
     let totalSpent = 0;
@@ -638,17 +818,52 @@ function calculateOverviewMetrics(period) {
     };
 }
 
+// Calculate total ads spent across all apps/countries (in R$)
+function calculateTotalAdsSpent() {
+    const apps = ['divinetalk', 'divinetv'];
+    let adsBR = 0;
+    let adsOthers = 0;
+    
+    apps.forEach(app => {
+        // BR: valor já em R$
+        const brKey = `${app}_BR`;
+        const brStored = localStorage.getItem(brKey);
+        if (brStored) {
+            const brData = JSON.parse(brStored);
+            brData.forEach(row => {
+                adsBR += parseFloat(row.valorGasto) || 0;
+            });
+        }
+        
+        // Outros países: converter × FX_RATE
+        ['US', 'CA', 'GB', 'AU'].forEach(country => {
+            const key = `${app}_${country}`;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                const data = JSON.parse(stored);
+                data.forEach(row => {
+                    adsOthers += (parseFloat(row.valorGasto) || 0) * FX_RATE;
+                });
+            }
+        });
+    });
+    
+    return { adsBR, adsOthers, total: adsBR + adsOthers };
+}
+
 // Update budget DRE card
 function updateBudgetDRE(month) {
     const budgetTotalInput = document.getElementById('budgetTotal');
     const expenseCustosFixosEl = document.getElementById('expenseCustosFixos');
     const expenseCustosVariaveisEl = document.getElementById('expenseCustosVariaveis');
     const expenseExtratoCartaoEl = document.getElementById('expenseExtratoCartao');
-    const expenseContasPagarEl = document.getElementById('expenseContasPagar');
     const totalGastoEl = document.getElementById('totalGasto');
     const budgetRemainingEl = document.getElementById('budgetRemaining');
     const budgetProgressBar = document.getElementById('budgetProgressBar');
     const budgetProgressLabel = document.getElementById('budgetProgressLabel');
+    const adsSpentBREl = document.getElementById('adsSpentBR');
+    const adsSpentOthersEl = document.getElementById('adsSpentOthers');
+    const adsSpentTotalEl = document.getElementById('adsSpentTotal');
     
     if (!budgetTotalInput) return;
     
@@ -662,31 +877,28 @@ function updateBudgetDRE(month) {
     
     budgetTotalInput.value = budgetTotal || 20000;
     
-    // Save budget when changed
-    budgetTotalInput.removeEventListener('input', handleBudgetInput); // Remove listener anterior
-    budgetTotalInput.addEventListener('input', handleBudgetInput);
-    
-    function handleBudgetInput() {
+    // Save budget when changed — remove old handler, add new one with current month
+    if (budgetTotalInput._budgetHandler) {
+        budgetTotalInput.removeEventListener('input', budgetTotalInput._budgetHandler);
+    }
+    budgetTotalInput._budgetHandler = function() {
         const newBudget = parseFloat(budgetTotalInput.value) || 0;
         localStorage.setItem(budgetKey, newBudget.toString());
         updateBudgetDRE(month); // Recalculate
-    }
+    };
+    budgetTotalInput.addEventListener('input', budgetTotalInput._budgetHandler);
     
-    // Buscar dados da aba Financeiro
+    // Buscar dados da aba Financeiro (sem contasPagar)
     const custosFixos = JSON.parse(localStorage.getItem(`financial_custosFixos_${month}`) || '[]');
     const custosVariaveis = JSON.parse(localStorage.getItem(`financial_custosVariaveis_${month}`) || '[]');
     const extratoCartao = JSON.parse(localStorage.getItem(`financial_extratoCartao_${month}`) || '[]');
-    const contasPagar = JSON.parse(localStorage.getItem(`financial_contasPagar_${month}`) || '[]');
     
-    // Calcular totais
+    // Calcular totais (sem contasPagar)
     const totalCustosFixos = custosFixos.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
     const totalCustosVariaveis = custosVariaveis.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
     const totalExtratoCartao = extratoCartao.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
-    const totalContasPagar = contasPagar
-        .filter(item => item.status === 'pendente')
-        .reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
     
-    const totalGasto = totalCustosFixos + totalCustosVariaveis + totalExtratoCartao + totalContasPagar;
+    const totalGasto = totalCustosFixos + totalCustosVariaveis + totalExtratoCartao;
     const restante = budgetTotal - totalGasto;
     const percentGasto = budgetTotal > 0 ? (totalGasto / budgetTotal) * 100 : 0;
     
@@ -694,9 +906,14 @@ function updateBudgetDRE(month) {
     if (expenseCustosFixosEl) expenseCustosFixosEl.textContent = formatCurrency(totalCustosFixos, 'BR');
     if (expenseCustosVariaveisEl) expenseCustosVariaveisEl.textContent = formatCurrency(totalCustosVariaveis, 'BR');
     if (expenseExtratoCartaoEl) expenseExtratoCartaoEl.textContent = formatCurrency(totalExtratoCartao, 'BR');
-    if (expenseContasPagarEl) expenseContasPagarEl.textContent = formatCurrency(totalContasPagar, 'BR');
     if (totalGastoEl) totalGastoEl.textContent = formatCurrency(totalGasto, 'BR');
     if (budgetRemainingEl) budgetRemainingEl.textContent = formatCurrency(restante, 'BR');
+    
+    // Gastos em Ads
+    const adsData = calculateTotalAdsSpent();
+    if (adsSpentBREl) adsSpentBREl.textContent = formatCurrency(adsData.adsBR, 'BR');
+    if (adsSpentOthersEl) adsSpentOthersEl.textContent = formatCurrency(adsData.adsOthers, 'BR');
+    if (adsSpentTotalEl) adsSpentTotalEl.textContent = formatCurrency(adsData.total, 'BR');
     
     // Atualizar barra de progresso
     if (budgetProgressBar) {
@@ -715,26 +932,88 @@ function updateBudgetDRE(month) {
     if (budgetProgressLabel) {
         budgetProgressLabel.textContent = `${percentGasto.toFixed(1)}%`;
     }
+    
+    // Update net profit card too
+    updateNetProfitCard(month);
 }
 
 // Legacy function - redirect to new DRE version
 function updateBudgetCard(period, totalSpent) {
     // This is kept for backward compatibility
-    // New code should use updateBudgetDRE(month)
     updateBudgetDRE(period);
 }
 
-// Update tax card
+// Update Net Profit card (replaces old tax card)
+function updateNetProfitCard(month) {
+    const netRevenueEl = document.getElementById('netRevenue');
+    const netAdsSpentEl = document.getElementById('netAdsSpent');
+    const netGrossProfitEl = document.getElementById('netGrossProfit');
+    const netCustosFixosEl = document.getElementById('netCustosFixos');
+    const netCustosVariaveisEl = document.getElementById('netCustosVariaveis');
+    const netImpostosEl = document.getElementById('netImpostos');
+    const netProfitEl = document.getElementById('netProfit');
+    
+    if (!netProfitEl) return;
+    
+    // Total faturamento de todos os apps/países
+    const apps = ['divinetalk', 'divinetv'];
+    const allCountries = ['BR', 'US', 'CA', 'GB', 'AU'];
+    let totalRevenue = 0;
+    
+    apps.forEach(app => {
+        allCountries.forEach(country => {
+            const key = `${app}_${country}`;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                const data = JSON.parse(stored);
+                data.forEach(row => {
+                    totalRevenue += (parseFloat(row.faturamentoApple) || 0) + (parseFloat(row.faturamentoAndroid) || 0);
+                });
+            }
+        });
+    });
+    
+    // Gastos em ads convertidos para R$
+    const adsData = calculateTotalAdsSpent();
+    const totalAdsR$ = adsData.total;
+    
+    // Lucro Bruto = Faturamento - Ads (em R$)
+    const lucroBruto = totalRevenue - totalAdsR$;
+    
+    // Buscar custos fixos e variáveis do mês atual do FinancialManager
+    const currentMonth = month || new Date().toISOString().substring(0, 7);
+    const custosFixos = JSON.parse(localStorage.getItem(`financial_custosFixos_${currentMonth}`) || '[]');
+    const custosVariaveis = JSON.parse(localStorage.getItem(`financial_custosVariaveis_${currentMonth}`) || '[]');
+    
+    const totalCustosFixos = custosFixos.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+    const totalCustosVariaveis = custosVariaveis.reduce((sum, item) => sum + parseFloat(item.valor || 0), 0);
+    
+    // Impostos: 6% do faturamento
+    const impostos = totalRevenue * 0.06;
+    
+    // Lucro Líquido
+    const lucroLiquido = lucroBruto - totalCustosFixos - totalCustosVariaveis - impostos;
+    
+    if (netRevenueEl) netRevenueEl.textContent = formatCurrency(totalRevenue, 'BR');
+    if (netAdsSpentEl) netAdsSpentEl.textContent = formatCurrency(totalAdsR$, 'BR');
+    if (netGrossProfitEl) {
+        netGrossProfitEl.textContent = formatCurrency(Math.abs(lucroBruto), 'BR');
+        netGrossProfitEl.style.color = lucroBruto < 0 ? 'var(--danger)' : '';
+    }
+    if (netCustosFixosEl) netCustosFixosEl.textContent = formatCurrency(totalCustosFixos, 'BR');
+    if (netCustosVariaveisEl) netCustosVariaveisEl.textContent = formatCurrency(totalCustosVariaveis, 'BR');
+    if (netImpostosEl) netImpostosEl.textContent = formatCurrency(impostos, 'BR');
+    if (netProfitEl) {
+        const isNeg = lucroLiquido < 0;
+        netProfitEl.textContent = (isNeg ? '- ' : '') + formatCurrency(Math.abs(lucroLiquido), 'BR');
+        netProfitEl.style.color = isNeg ? 'var(--danger)' : 'var(--success)';
+    }
+}
+
+// Legacy compat
 function updateTaxCard(totalRevenue) {
-    const taxRevenueEl = document.getElementById('taxRevenue');
-    const taxAmountEl = document.getElementById('taxAmount');
-    
-    if (!taxRevenueEl) return;
-    
-    const taxAmount = totalRevenue * 0.06;
-    
-    taxRevenueEl.textContent = formatCurrency(totalRevenue, 'BR');
-    taxAmountEl.textContent = formatCurrency(taxAmount, 'BR');
+    // Now handled by updateNetProfitCard
+    updateNetProfitCard(overviewSelectedPeriod);
 }
 
 // Update country comparison chart
@@ -936,7 +1215,8 @@ function updateCountryChart(countryMetrics, metric) {
 // ============================================
 
 function updateOverviewMetrics() {
-    const apps = ['divinetalk', 'divinetv'];
+    const allApps = ['divinetalk', 'divinetv'];
+    const apps = (overviewAppFilter && overviewAppFilter !== 'all') ? [overviewAppFilter] : allApps;
     const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
     
     let globalTrials = 0;
@@ -1022,12 +1302,20 @@ function updateOverviewMetrics() {
     // Global revenue: usar formatCurrency com 'GLOBAL' (será $)
     if (globalRevenueEl) globalRevenueEl.textContent = formatCurrency(globalRevenue, 'GLOBAL');
     if (globalConversionEl) globalConversionEl.textContent = globalConversionRate.toFixed(2);
-    if (topRegionEl) topRegionEl.textContent = `${COUNTRIES[topRegion].flag} ${COUNTRIES[topRegion].name}`;
+    if (topRegionEl && Object.keys(regionRevenues).length > 0) {
+        topRegionEl.textContent = `${COUNTRIES[topRegion].flag} ${COUNTRIES[topRegion].name}`;
+    }
     
-    // Update new overview features (budget, tax, chart) with filtered period
-    const metrics = calculateOverviewMetrics(overviewSelectedPeriod);
+    // Show/hide regional summary tables based on app filter
+    const sectionTalk = document.getElementById('regionalSummaryDivineTalk');
+    const sectionTV = document.getElementById('regionalSummaryDivineTV');
+    if (sectionTalk) sectionTalk.style.display = (overviewAppFilter === 'divinetv') ? 'none' : '';
+    if (sectionTV) sectionTV.style.display = (overviewAppFilter === 'divinetalk') ? 'none' : '';
+    
+    // Update new overview features (budget, lucro líquido, chart) with filtered period
+    const metrics = calculateOverviewMetrics(overviewSelectedPeriod, overviewAppFilter);
     updateBudgetDRE(overviewSelectedPeriod); // Updated to DRE version
-    updateTaxCard(metrics.totalRevenue);
+    updateNetProfitCard(overviewSelectedPeriod);
     updateCountryChart(metrics.countryMetrics, currentChartMetric);
 }
 
@@ -1058,6 +1346,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // App filter - Overview
+    const appFilterOverview = document.getElementById('appFilterOverview');
+    if (appFilterOverview) {
+        appFilterOverview.addEventListener('change', () => {
+            overviewAppFilter = appFilterOverview.value;
+            updateOverviewMetrics();
+        });
+    }
+    
+    // App filter - Dashboards
+    const appFilterDashboards = document.getElementById('appFilterDashboards');
+    if (appFilterDashboards) {
+        appFilterDashboards.addEventListener('change', () => {
+            dashboardsAppFilter = appFilterDashboards.value;
+            // Re-render dashboards with new filter (if dashboard-analytics.js supports it)
+            if (typeof renderDashboards === 'function') {
+                renderDashboards();
+            }
+        });
+    }
+    
     // Chart metric toggle buttons
     const chartButtons = document.querySelectorAll('.chart-btn');
     chartButtons.forEach(btn => {
@@ -1075,6 +1384,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.documentElement.style.scrollBehavior = 'smooth';
+
+// ============================================
+// ACCORDION TOGGLE
+// ============================================
+
+function toggleAccordion(bodyId, arrowId) {
+    const body = document.getElementById(bodyId);
+    const arrow = document.getElementById(arrowId);
+    if (!body) return;
+    
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+}
 
 // ============================================
 // FINANCIAL MANAGER

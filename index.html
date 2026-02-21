@@ -40,11 +40,17 @@
             <div class="view active" id="view-overview">
                 <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--divine-gold);">📊 Visão Geral Multi-Regional</h2>
                 
-                <!-- Filtro de Período -->
+                <!-- Filtro de Período + App -->
                 <div class="period-filter">
                     <label>📅 Período:</label>
                     <select id="periodFilterOverview">
                         <option value="all">Todo o período</option>
+                    </select>
+                    <label style="margin-left:1rem;">📱 App:</label>
+                    <select id="appFilterOverview">
+                        <option value="all">Todos os Apps</option>
+                        <option value="divinetalk">DivineTalk</option>
+                        <option value="divinetv">DivineTV</option>
                     </select>
                 </div>
 
@@ -78,17 +84,32 @@
                                 <span class="expense-label">Extrato Cartão</span>
                                 <span class="expense-value" id="expenseExtratoCartao">R$ 0,00</span>
                             </div>
-                            <div class="expense-line">
-                                <span class="expense-icon">📋</span>
-                                <span class="expense-label">Contas a Pagar (pendentes)</span>
-                                <span class="expense-value" id="expenseContasPagar">R$ 0,00</span>
-                            </div>
                             
                             <div class="expense-divider"></div>
                             
                             <div class="expense-total">
                                 <span class="label">Total Gasto:</span>
                                 <span class="value" id="totalGasto">R$ 0,00</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Gastos em Ads -->
+                        <div class="budget-breakdown" style="margin-top:1rem;">
+                            <h4>GASTOS EM ADS:</h4>
+                            <div class="expense-line">
+                                <span class="expense-icon">🇧🇷</span>
+                                <span class="expense-label">Ads BR (R$)</span>
+                                <span class="expense-value" id="adsSpentBR">R$ 0,00</span>
+                            </div>
+                            <div class="expense-line">
+                                <span class="expense-icon">🌍</span>
+                                <span class="expense-label">Ads Outros Países (R$)</span>
+                                <span class="expense-value" id="adsSpentOthers">R$ 0,00</span>
+                            </div>
+                            <div class="expense-divider"></div>
+                            <div class="expense-total">
+                                <span class="label">Total Ads (R$):</span>
+                                <span class="value" id="adsSpentTotal">R$ 0,00</span>
                             </div>
                         </div>
                         
@@ -103,17 +124,37 @@
                         </div>
                     </div>
                     
-                    <!-- Card Impostos -->
+                    <!-- Card Lucro Líquido -->
                     <div class="overview-card tax-card">
-                        <h3>📊 Impostos (6%)</h3>
+                        <h3>💵 Lucro Líquido</h3>
                         <div class="tax-details">
                             <div class="tax-line">
                                 <span>Faturamento Total:</span>
-                                <span id="taxRevenue" class="tax-value">R$ 0,00</span>
+                                <span id="netRevenue" class="tax-value">R$ 0,00</span>
+                            </div>
+                            <div class="tax-line">
+                                <span>Gastos em Ads (R$):</span>
+                                <span id="netAdsSpent" class="tax-value">R$ 0,00</span>
+                            </div>
+                            <div class="tax-line">
+                                <span>Lucro Bruto:</span>
+                                <span id="netGrossProfit" class="tax-value">R$ 0,00</span>
+                            </div>
+                            <div class="tax-line">
+                                <span>Custos Fixos:</span>
+                                <span id="netCustosFixos" class="tax-value">R$ 0,00</span>
+                            </div>
+                            <div class="tax-line">
+                                <span>Custos Variáveis:</span>
+                                <span id="netCustosVariaveis" class="tax-value">R$ 0,00</span>
+                            </div>
+                            <div class="tax-line">
+                                <span>Impostos (6%):</span>
+                                <span id="netImpostos" class="tax-value">R$ 0,00</span>
                             </div>
                             <div class="tax-line tax-highlight">
-                                <span>Impostos (6%):</span>
-                                <span id="taxAmount" class="tax-value tax-amount-value">R$ 0,00</span>
+                                <span>Lucro Líquido:</span>
+                                <span id="netProfit" class="tax-value tax-amount-value">R$ 0,00</span>
                             </div>
                         </div>
                     </div>
@@ -170,7 +211,7 @@
                 </div>
 
                 <!-- Regional Summary Tables -->
-                <div class="regional-summary">
+                <div class="regional-summary" id="regionalSummaryDivineTalk">
                     <h2>🌎 Resumo Regional - Divine Talk</h2>
                     <div class="table-wrapper">
                         <table class="summary-table">
@@ -236,7 +277,7 @@
                     </div>
                 </div>
 
-                <div class="regional-summary">
+                <div class="regional-summary" id="regionalSummaryDivineTV">
                     <h2>🌎 Resumo Regional - Divine TV</h2>
                     <div class="table-wrapper">
                         <table class="summary-table">
@@ -330,6 +371,9 @@
                     <button class="country-tab" data-app="divinetalk" data-country="GLOBAL">
                         🌎 Global
                     </button>
+                    <button class="country-tab" data-app="divinetalk" data-country="ALL">
+                        🌎 Todos os Países
+                    </button>
                 </div>
 
                 <!-- Period Filter -->
@@ -363,6 +407,18 @@
                         <div class="stat-content">
                             <h3>Lucro Bruto</h3>
                             <p class="stat-value" id="divinetalk-lucroBruto">—</p>
+                            <span class="stat-label">No período selecionado</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📣</div>
+                        <div class="stat-content">
+                            <h3>Valor Gasto em Ads</h3>
+                            <p class="stat-value" id="divinetalk-valorGasto">—</p>
+                            <div id="divinetalk-imposto-section" style="display:none; margin-top:0.3rem;">
+                                <span class="stat-label" style="color:var(--warning);">+13% imposto</span>
+                                <p class="stat-value" id="divinetalk-valorGastoComImposto" style="font-size:1.1rem; margin-top:0.2rem;">—</p>
+                            </div>
                             <span class="stat-label">No período selecionado</span>
                         </div>
                     </div>
@@ -436,6 +492,9 @@
                     <button class="country-tab" data-app="divinetv" data-country="GLOBAL">
                         🌎 Global
                     </button>
+                    <button class="country-tab" data-app="divinetv" data-country="ALL">
+                        🌎 Todos os Países
+                    </button>
                 </div>
 
                 <!-- Period Filter -->
@@ -469,6 +528,18 @@
                         <div class="stat-content">
                             <h3>Lucro Bruto</h3>
                             <p class="stat-value" id="divinetv-lucroBruto">—</p>
+                            <span class="stat-label">No período selecionado</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📣</div>
+                        <div class="stat-content">
+                            <h3>Valor Gasto em Ads</h3>
+                            <p class="stat-value" id="divinetv-valorGasto">—</p>
+                            <div id="divinetv-imposto-section" style="display:none; margin-top:0.3rem;">
+                                <span class="stat-label" style="color:var(--warning);">+13% imposto</span>
+                                <p class="stat-value" id="divinetv-valorGastoComImposto" style="font-size:1.1rem; margin-top:0.2rem;">—</p>
+                            </div>
                             <span class="stat-label">No período selecionado</span>
                         </div>
                     </div>
@@ -564,27 +635,29 @@
                     </div>
                 </div>
                 
-                <!-- Tabela 1: Contas a Pagar -->
+                <!-- Tabela 1: Contas a Pagar (colapsável) -->
                 <div class="financial-section">
-                    <div class="section-header">
-                        <h3>📋 Contas a Pagar</h3>
-                        <button class="action-btn add-btn" id="addContasPagar">➕ Adicionar</button>
+                    <div class="section-header accordion-header" id="accordionContasPagar" onclick="toggleAccordion('contasPagarBody', 'accordionArrowContasPagar')">
+                        <h3>📋 Contas a Pagar <span id="accordionArrowContasPagar" class="accordion-arrow">▶</span></h3>
+                        <button class="action-btn add-btn" id="addContasPagar" onclick="event.stopPropagation()">➕ Adicionar</button>
                     </div>
-                    <div class="table-wrapper">
-                        <table id="tableContasPagar" class="editable-table financial-table">
-                            <thead>
-                                <tr>
-                                    <th>Vencimento</th>
-                                    <th>Descrição</th>
-                                    <th>Valor</th>
-                                    <th>Status</th>
-                                    <th class="actions-col">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyContasPagar">
-                                <!-- Rows will be injected here -->
-                            </tbody>
-                        </table>
+                    <div id="contasPagarBody" class="accordion-body" style="display:none;">
+                        <div class="table-wrapper">
+                            <table id="tableContasPagar" class="editable-table financial-table">
+                                <thead>
+                                    <tr>
+                                        <th>Vencimento</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                        <th class="actions-col">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyContasPagar">
+                                    <!-- Rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
@@ -663,11 +736,17 @@
             <div class="view" id="view-dashboards">
                 <h2 style="margin-bottom: 2rem; font-size: 2rem; color: var(--divine-gold);">📊 Dashboards - Análise Comparativa</h2>
                 
-                <!-- Filtro de Período -->
+                <!-- Filtro de Período + App -->
                 <div class="period-filter">
                     <label>📅 Período:</label>
                     <select id="periodFilterDashboards">
                         <option value="all">Todo o período</option>
+                    </select>
+                    <label style="margin-left:1rem;">📱 App:</label>
+                    <select id="appFilterDashboards">
+                        <option value="all">Todos os Apps</option>
+                        <option value="divinetalk">DivineTalk</option>
+                        <option value="divinetv">DivineTV</option>
                     </select>
                 </div>
                 

@@ -93,6 +93,14 @@ class DashboardAnalytics {
             });
         }
         
+        // App filter for dashboards
+        const appFilter = document.getElementById('appFilterDashboards');
+        if (appFilter) {
+            appFilter.addEventListener('change', () => {
+                this.loadAndRenderAllCharts();
+            });
+        }
+        
         // Country Comparison metric buttons
         const countryButtons = document.querySelectorAll('#view-dashboards .chart-container:nth-child(1) .metric-btn');
         countryButtons.forEach(btn => {
@@ -141,7 +149,10 @@ class DashboardAnalytics {
     }
     
     async loadAllData(period) {
-        const apps = ['divinetalk', 'divinetv'];
+        const allApps = ['divinetalk', 'divinetv'];
+        // Respect global app filter from script.js
+        const appFilter = (typeof dashboardsAppFilter !== 'undefined' && dashboardsAppFilter !== 'all') ? dashboardsAppFilter : null;
+        const apps = appFilter ? [appFilter] : allApps;
         const countries = ['BR', 'US', 'CA', 'GB', 'AU'];
         
         const data = {

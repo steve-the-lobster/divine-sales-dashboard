@@ -1432,6 +1432,28 @@ header h1 {
     letter-spacing: -0.01em;
 }
 
+/* Accordion */
+.accordion-header {
+    cursor: pointer;
+    user-select: none;
+    transition: opacity var(--transition-fast);
+}
+
+.accordion-header:hover {
+    opacity: 0.85;
+}
+
+.accordion-arrow {
+    font-size: 0.85em;
+    margin-left: 0.5rem;
+    color: var(--divine-gold);
+    transition: transform var(--transition-base);
+}
+
+.accordion-body {
+    margin-top: var(--space-4);
+}
+
 .financial-table {
     width: 100%;
 }
